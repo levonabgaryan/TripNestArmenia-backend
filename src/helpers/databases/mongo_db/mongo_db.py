@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 from dotenv import find_dotenv, load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -17,6 +18,17 @@ MONGO_URI = f"mongodb://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PO
 client = AsyncIOMotorClient(MONGO_URI)
 mongo_async_client = client[MONGO_DB_NAME]
 
+async def set_log_level():
+    # Выполняем команду для изменения уровня логирования на WARN (1)
+    await mongo_async_client.admin.command({"setParameter": 1, "logLevel": 1})
+
+    # Проверяем текущий уровень логирования
+    result = await mongo_async_client.admin.command("getParameter", "logLevel")
+    print("Current log level:", result.get("logLevel"))
+
+
+if __name__ == "__main__":
+    asyncio.run(set_log_level())
 
 
 

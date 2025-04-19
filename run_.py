@@ -4,7 +4,7 @@ import signal
 import sys
 import asyncio
 
-from src.helpers.databases.mongo_db.mongo_collections.places.schema_ import create_collection_if_not_exists
+from src.helpers.databases.mongo_db.mongo_collections.places.schema_.schema_ import create_collection_if_not_exists
 
 
 def start_server():
@@ -37,5 +37,5 @@ if __name__ == "__main__":
         process = start_server()
         handle_keyboard_interrupt(process)
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
-        sys.exit(1)
+        raise
+
