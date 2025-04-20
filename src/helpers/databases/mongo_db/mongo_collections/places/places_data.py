@@ -1,4 +1,5 @@
 GYUMRI_DATA = {
+    'name': 'Gyumri',
     'description': 'Lennagan jan',
     'location': {
         'region': 'Shirak',
@@ -8,6 +9,7 @@ GYUMRI_DATA = {
 }
 
 LORI_DATA = {
+    'name': 'Vanadzor',
     'description': 'Lori jan',
     'location': {
         'region': 'Lori',
@@ -17,6 +19,7 @@ LORI_DATA = {
 }
 
 MARTUNI_DATA = {
+    'name': 'Martuni',
     'description': 'Martuni jan',
     'location': {
         'region': 'Gegharquniq',
@@ -25,4 +28,14 @@ MARTUNI_DATA = {
     'image_uri': 'src/helpers/databases/mongo_db/mongo_collections/places/images/martuni.jpg'
 }
 
-DATA = (GYUMRI_DATA, LORI_DATA, MARTUNI_DATA)
+SEVAN_DATA = {
+    'name': 'Sevan',
+    'description': 'Sevan jan',
+    'location': {
+        'region': 'Gegharquniq',
+        'city': 'Sevan'
+    },
+    'image_uri': 'src/helpers/databases/mongo_db/mongo_collections/places/images/martuni.jpg'
+}
+
+DATA = (GYUMRI_DATA, LORI_DATA, MARTUNI_DATA, SEVAN_DATA)

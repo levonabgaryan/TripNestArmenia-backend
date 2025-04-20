@@ -16,6 +16,7 @@ class LocationModel(BaseModel):
 
 
 class PlaceModel(BaseModel):
+    name: str  # must be unique for init data
     description: str
     location: LocationModel
     image_uri: Optional[str]
@@ -27,10 +28,29 @@ class PlaceModel(BaseModel):
         return data
 
 
+async def handle_place_insert(data: dict, collection):
+    place = PlaceModel(**data)
+    image_name = os.path.basename(place.image_uri)
+
+    # Проверка наличия по уникальному name
+    existing = await collection.find_one({"name": place.name})
+    if existing:
+        return  # Пропускаем, если уже есть
+
+    # Загружаем изображение (если его ещё нет)
+    await upload_local_image_in_db(place.image_uri)
+
+    # Подготавливаем документ и вставляем
+    document = place.model_dump()
+    document['image_uri'] = image_name
+    await collection.insert_one(document)
+
+
 async def create_collection_if_not_exists() -> None:
     collection = mongo_async_client["places"]
-    collection_names = await mongo_async_client.list_collection_names()
-    if "places" not in collection_names:
+
+    existing_collections = await mongo_async_client.list_collection_names()
+    if "places" not in existing_collections:
         await collection.insert_one({
             "name": "Test Place",
             "description": "This is a test place.",
@@ -40,13 +60,19 @@ async def create_collection_if_not_exists() -> None:
             }
         })
 
+    # 3) Подготавливаем корутины для загрузки картинок и вставки документов
+    async def handle_place(data: dict):
+        place = PlaceModel(**data)
+        image_name = os.path.basename(place.image_uri)
 
-    validate_data: Iterable[Dict] = (PlaceModel(**data).model_dump() for data in DATA)
+        if await collection.find_one({"name": place.name}):
+            return
 
-    if validate_data:
-        tasks = []  # Список задач для асинхронной обработки
-        for data in validate_data:
-            tasks.append(upload_local_image_in_db(data['image_uri']))  # Добавляем задачу в список
-            tasks.append(collection.insert_one(data))  # Добавляем задачу вставки данных
+        await upload_local_image_in_db(place.image_uri)
 
-        await asyncio.gather(*tasks)
+        doc = place.model_dump()
+        doc["image_uri"] = image_name
+        await collection.insert_one(doc)
+
+    tasks = [handle_place(data) for data in DATA]
+    await asyncio.gather(*tasks)
