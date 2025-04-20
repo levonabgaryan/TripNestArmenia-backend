@@ -1,41 +1,42 @@
 GYUMRI_DATA = {
-    'name': 'Gyumri',
+    'name': 'gyumri',
     'description': 'Lennagan jan',
     'location': {
         'region': 'Shirak',
         'city': 'Gyumri'
     },
-    'image_uri': 'src/helpers/databases/mongo_db/mongo_collections/places/images/gyumri.jpg'
+    # must bi list because one place can have many images
+    'image_name': 'src/helpers/databases/mongo_db/mongo_collections/places/images/gyumri.jpg'
 }
 
 LORI_DATA = {
-    'name': 'Vanadzor',
+    'name': 'vanadzor',
     'description': 'Lori jan',
     'location': {
         'region': 'Lori',
         'city': 'Vanadzor'
     },
-    'image_uri': 'src/helpers/databases/mongo_db/mongo_collections/places/images/lori.jpg'
+    'image_name': 'src/helpers/databases/mongo_db/mongo_collections/places/images/lori.jpg'
 }
 
 MARTUNI_DATA = {
-    'name': 'Martuni',
+    'name': 'martuni',
     'description': 'Martuni jan',
     'location': {
         'region': 'Gegharquniq',
         'city': 'Martuni'
     },
-    'image_uri': 'src/helpers/databases/mongo_db/mongo_collections/places/images/martuni.jpg'
+    'image_name': 'src/helpers/databases/mongo_db/mongo_collections/places/images/martuni.jpg'
 }
 
 SEVAN_DATA = {
-    'name': 'Sevan',
+    'name': 'sevan',
     'description': 'Sevan jan',
     'location': {
         'region': 'Gegharquniq',
         'city': 'Sevan'
     },
-    'image_uri': 'src/helpers/databases/mongo_db/mongo_collections/places/images/martuni.jpg'
+    'image_name': 'src/helpers/databases/mongo_db/mongo_collections/places/images/martuni.jpg'
 }
 
 DATA = (GYUMRI_DATA, LORI_DATA, MARTUNI_DATA, SEVAN_DATA)

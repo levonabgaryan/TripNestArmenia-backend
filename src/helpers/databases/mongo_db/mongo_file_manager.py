@@ -27,14 +27,14 @@ async def download_file_from_mongo_db(file_name: str) -> AsyncIOMotorGridOut:
     return stream
 
 
-async def upload_image_in_db(file: UploadFile, file_name: str) -> None:
+async def upload_file_in_db(file: UploadFile, file_name: str) -> None:
     file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
     contents = await file.read()
     stream: IO[bytes] = BytesIO(contents)
     await file_manager.upload_from_stream(file_name, stream)
 
 
-async def upload_local_image_in_db(local_file_path: str) -> None:
+async def upload_local_file_in_db(local_file_path: str) -> None:
     file_name = os.path.basename(local_file_path)
     if not await is_file_exists(file_name):
         file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
@@ -60,8 +60,7 @@ async def _fetch_file_data(name: str) -> Tuple[str, bytes]:
     return name, data
 
 
-
-async def create_images_zip_buffer(file_names: List[str]) -> BytesIO:
+async def create_files_zip_buffer(file_names: List[str]) -> BytesIO:
     """
     Собирает переданные file_names из GridFS в один ZIP-архив
     и возвращает BytesIO с этим архивом.
@@ -78,3 +77,15 @@ async def create_images_zip_buffer(file_names: List[str]) -> BytesIO:
 
     buf.seek(0)
     return buf
+
+
+async def find_filenames_by_prefix(prefix: str) -> List[str]:
+    file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
+    cursor = file_manager.find({"filename": {"$regex": f"^{prefix}"}})
+
+    filenames = []
+    async for file in cursor:
+        filenames.append(file.filename)
+
+    return filenames
+
