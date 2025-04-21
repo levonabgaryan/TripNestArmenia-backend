@@ -4,7 +4,7 @@ import signal
 import sys
 import asyncio
 
-from src.helpers.databases.mongo_db.mongo_collections.places.schema_.schema_ import create_collection_if_not_exists
+from src.helpers.databases.mongo_db.mongo_image_files.gyumri_data import upload_gyumri_data
 
 
 def start_server():
@@ -32,7 +32,7 @@ def handle_keyboard_interrupt(process_):
 if __name__ == "__main__":
     try:
         print("📦 Проверка MongoDB и создание коллекции...")
-        asyncio.run(create_collection_if_not_exists())
+        asyncio.run(upload_gyumri_data())
 
         process = start_server()
         handle_keyboard_interrupt(process)

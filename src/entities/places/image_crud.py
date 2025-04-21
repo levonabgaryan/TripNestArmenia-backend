@@ -1,15 +1,18 @@
 from io import BytesIO
 
+
 from src.helpers.databases.mongo_db.mongo_file_manager import (
-    find_filenames_by_prefix,
     create_files_zip_buffer,
-    download_file_from_mongo_db
+    download_file_from_mongo_db,
+    find_filenames_by_location
 )
 
 
-async def get_images_by_prefix(prefix: str) -> BytesIO:
-    prefix = prefix.lower()
-    file_names = await find_filenames_by_prefix(prefix)
+async def get_images_zip_by_location(location: str) -> BytesIO | None:
+    location = location.lower()
+    file_names = await find_filenames_by_location(location_pattern=location)
+    if not file_names:
+        return None
     return await create_files_zip_buffer(file_names)
 
 

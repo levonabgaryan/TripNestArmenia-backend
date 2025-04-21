@@ -1,19 +1,30 @@
 import os
 from io import BytesIO
-from typing import IO, List, Tuple
+from typing import IO, List, Tuple, Optional, TypedDict
 import zipfile
 import asyncio
 
 import aiofiles
-from fastapi import UploadFile, HTTPException
+from fastapi import UploadFile
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket, AsyncIOMotorGridOut
 
 from src.helpers.databases.mongo_db.mongo_db import mongo_async_client
 
 
-async def is_file_exists(file_name: str) -> bool:
+class PlaceMetadata(TypedDict):
+    place_name: str
+    location: str
+    region: str
+    local_image_path: Optional[str]
+    description: Optional[str]
+
+
+# filename is a correct name of place e.g. Յոթ_վերք_եկեղեցի_1, location=Գյումրի, region=Շիրակ, place_name=Յոթ_վերք
+
+async def is_file_exists_by_file_name(file_name: str) -> bool:
+    query = {"filename": file_name}
     file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
-    cursor = file_manager.find({"filename": file_name})
+    cursor = file_manager.find(query)
 
     async for _ in cursor:
         return True
@@ -27,37 +38,40 @@ async def download_file_from_mongo_db(file_name: str) -> AsyncIOMotorGridOut:
     return stream
 
 
-async def upload_file_in_db(file: UploadFile, file_name: str) -> None:
+async def upload_file_in_db(file: UploadFile, file_name: str, metadata: PlaceMetadata) -> None:
     file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
-    contents = await file.read()
-    stream: IO[bytes] = BytesIO(contents)
-    await file_manager.upload_from_stream(file_name, stream)
+    if not await is_file_exists_by_file_name(file_name):
+        contents = await file.read()
+        stream: IO[bytes] = BytesIO(contents)
+        await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
 
 
-async def upload_local_file_in_db(local_file_path: str) -> None:
+async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata) -> None:
     file_name = os.path.basename(local_file_path)
-    if not await is_file_exists(file_name):
+    idx = file_name.find('.')
+    file_name = file_name[:idx]
+    if not await is_file_exists_by_file_name(file_name):
         file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
 
         async with aiofiles.open(local_file_path, 'rb') as file:
             data = await file.read()
 
         stream: IO[bytes] = BytesIO(data)
-        await file_manager.upload_from_stream(file_name, stream)
+        await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
 
 
-async def _fetch_file_data(name: str) -> Tuple[str, bytes]:
+async def _fetch_file_data(file_name: str) -> Tuple[str, bytes] | None:
     try:
-        stream = await download_file_from_mongo_db(name)
+        stream = await download_file_from_mongo_db(file_name)
     except Exception:
-        raise HTTPException(status_code=404, detail=f"File {name} not found in database")
+        raise
 
     try:
         data = await stream.read()
     except Exception:
-        raise HTTPException(status_code=500, detail=f"Error reading file {name}")
+        raise
 
-    return name, data
+    return file_name, data
 
 
 async def create_files_zip_buffer(file_names: List[str]) -> BytesIO:
@@ -79,13 +93,15 @@ async def create_files_zip_buffer(file_names: List[str]) -> BytesIO:
     return buf
 
 
-async def find_filenames_by_prefix(prefix: str) -> List[str]:
-    file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
-    cursor = file_manager.find({"filename": {"$regex": f"^{prefix}"}})
+async def find_filenames_by_location(location_pattern: str) -> List[str]:
+    files_collection = mongo_async_client["fs"]["files"]
+    query = {"metadata.location": {"$regex": f"^{location_pattern}"}}
+
+    cursor = files_collection.find(query)
 
     filenames = []
     async for file in cursor:
-        filenames.append(file.filename)
+        filenames.append(file["filename"])
 
     return filenames
 
