@@ -10,9 +10,9 @@ router = APIRouter(prefix='/place-data', tags=['place-data'])
 @router.get('/get-place-images/{place_name}')
 async def get_images(place_name: str):
     place_images = await get_images_zip_by_location(place_name)
-
+    print(place_name)
     if place_images is None:
-        raise NotFound(message=f"Missing data for '{place_name}' place")
+        raise NotFound(status_code=404, message=f"Missing data for '{place_name}' place")
 
     return StreamingResponse(
         content=place_images,

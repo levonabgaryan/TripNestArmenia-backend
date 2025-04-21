@@ -3,6 +3,7 @@ from io import BytesIO
 from typing import IO, List, Tuple, Optional, TypedDict
 import zipfile
 import asyncio
+import json
 
 import aiofiles
 from fastapi import UploadFile
@@ -60,7 +61,8 @@ async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata)
         await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
 
 
-async def _fetch_file_data(file_name: str) -> Tuple[str, bytes] | None:
+async def _fetch_file_data(file_name: str) -> Tuple[PlaceMetadata, bytes] | None:
+    metadata = await find_file_metadata_by_file_name(file_name)
     try:
         stream = await download_file_from_mongo_db(file_name)
     except Exception:
@@ -70,32 +72,33 @@ async def _fetch_file_data(file_name: str) -> Tuple[str, bytes] | None:
         data = await stream.read()
     except Exception:
         raise
-
-    return file_name, data
+    return metadata, data
 
 
 async def create_files_zip_buffer(file_names: List[str]) -> BytesIO:
-    """
-    Собирает переданные file_names из GridFS в один ZIP-архив
-    и возвращает BytesIO с этим архивом.
-    """
-    # 1) Запускаем загрузку всех файлов параллельно
     tasks = [_fetch_file_data(name) for name in file_names]
     results = await asyncio.gather(*tasks)
 
-    # 2) Собираем ZIP
     buf = BytesIO()
+
     with zipfile.ZipFile(buf, mode="w") as zf:
-        for name, data in results:
-            zf.writestr(name, data)
+        for metadata, data in results:
+            place_name = metadata.get('place_name') or "unknown"
+            zf.writestr(place_name, data)
 
     buf.seek(0)
     return buf
 
 
+
 async def find_filenames_by_location(location_pattern: str) -> List[str]:
     files_collection = mongo_async_client["fs"]["files"]
-    query = {"metadata.location": {"$regex": f"^{location_pattern}"}}
+    query = {
+        "metadata.location": {
+            "$regex": f"^{location_pattern}",
+            "$options": "i"  # регистронезависимый поиск
+        }
+    }
 
     cursor = files_collection.find(query)
 
@@ -105,3 +108,11 @@ async def find_filenames_by_location(location_pattern: str) -> List[str]:
 
     return filenames
 
+
+async def find_file_metadata_by_file_name(file_name: str) -> PlaceMetadata | None:
+    files_collection = mongo_async_client["fs"]["files"]
+    file_metadata = await files_collection.find_one({"filename": file_name})
+    if file_metadata and "metadata" in file_metadata:
+        metadata = file_metadata["metadata"]
+        return metadata
+    return None

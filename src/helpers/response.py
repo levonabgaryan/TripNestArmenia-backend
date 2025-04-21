@@ -7,7 +7,6 @@ from src.helpers import messages
 
 class TripNestArmeniaJSONResponse(JSONResponse):
     status_code = status.HTTP_200_OK
-    # message = messages.SUCCESS
 
     def __init__(
             self,

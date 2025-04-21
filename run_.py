@@ -3,6 +3,7 @@ import subprocess
 import signal
 import sys
 import asyncio
+import traceback
 
 from src.helpers.databases.mongo_db.mongo_image_files.gyumri_data import upload_gyumri_data
 
@@ -30,12 +31,14 @@ def handle_keyboard_interrupt(process_):
 
 
 if __name__ == "__main__":
+    print("📦 Проверка MongoDB и создание коллекции...")
     try:
-        print("📦 Проверка MongoDB и создание коллекции...")
         asyncio.run(upload_gyumri_data())
-
-        process = start_server()
-        handle_keyboard_interrupt(process)
     except Exception as e:
-        raise
+        print("❌ Ошибка при загрузке данных:")
+        traceback.print_exc()  # выведет полный стек
+        print("Продолжаем запуск сервера...\n")
 
+    # Запускаем сервер в любом случае
+    process = start_server()
+    handle_keyboard_interrupt(process)
