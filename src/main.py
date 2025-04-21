@@ -11,10 +11,11 @@ app.include_router(data_.router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],            # Разрешить запросы от всех источников (можно заменить на свой домен)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]           # <-- Вот здесь ты разрешаешь читать все заголовки
 )
 
 

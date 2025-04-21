@@ -19,10 +19,7 @@ client = AsyncIOMotorClient(MONGO_URI)
 mongo_async_client = client[MONGO_DB_NAME]
 
 async def set_log_level():
-    # Выполняем команду для изменения уровня логирования на WARN (1)
     await mongo_async_client.admin.command({"setParameter": 1, "logLevel": 1})
-
-    # Проверяем текущий уровень логирования
     result = await mongo_async_client.admin.command("getParameter", "logLevel")
     print("Current log level:", result.get("logLevel"))
 
