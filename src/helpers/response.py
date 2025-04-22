@@ -7,11 +7,13 @@ from src.helpers import messages
 
 class TripNestArmeniaJSONResponse(JSONResponse):
     status_code = status.HTTP_200_OK
+    message = messages.SUCCESS
+
 
     def __init__(
             self,
             status_code=status_code,
-            message: str | None = None,
+            message: str = messages,
             content: dict[str, Any] | None = None
     ):
         content = content or {}

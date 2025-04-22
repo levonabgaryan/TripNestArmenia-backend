@@ -11,8 +11,8 @@ class TripNestArmeniaException(HTTPException):
 
     def __init__(
             self,
-            status_code=status_code,
-            message=message,
+            status_code: int =status_code,
+            message: str =message,
             content: Dict[str, Any] | None = None
     ):
         content = content or {}

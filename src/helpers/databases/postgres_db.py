@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import AsyncGenerator, Any
 
 from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped, mapped_column
@@ -22,7 +23,7 @@ async_session = async_sessionmaker(
 )
 
 
-async def get_async_session() -> AsyncSession:
+async def get_async_session() -> AsyncGenerator[AsyncSession | Any, Any]:
     async with async_session() as async_session_client:
         yield async_session_client
 

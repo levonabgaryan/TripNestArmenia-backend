@@ -1,5 +1,5 @@
 INTERNAL_SERVER_ERROR ="Something went wrong"
-
+SUCCESS = 'Success'
 INVALID_PASSWORD_FORMAT = "Invalid password"
 
 # Email

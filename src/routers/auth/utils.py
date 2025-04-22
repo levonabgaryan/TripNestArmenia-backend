@@ -15,7 +15,7 @@ def is_valid_password(password: str) -> bool:
 
 def validate_password_format(value, handler):
     if not is_valid_password(value):
-        raise ValidationError(INVALID_PASSWORD_FORMAT)
+        raise ValidationError(message=INVALID_PASSWORD_FORMAT)
 
     return value
 

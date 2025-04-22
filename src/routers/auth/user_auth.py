@@ -18,7 +18,7 @@ from src.routers.auth.utils import get_password_hash
 from src.helpers.mail import send_mail
 
 
-router = APIRouter(prefix='/user-auth', tags=['user-auth'])
+router = APIRouter(prefix='/user', tags=['user'])
 
 @router.post('/sign-up')
 async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_async_session)):
