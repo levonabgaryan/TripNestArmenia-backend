@@ -16,6 +16,7 @@ asyncpg = "0.30.0"
 motor = "^3.7.0"
 aiofiles = "^24.1.0"
 python-multipart = "^0.0.20"
+inflection = "^0.5.1"
 
 [build-system]
 requires = ["poetry-core"]

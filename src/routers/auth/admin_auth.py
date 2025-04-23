@@ -39,7 +39,6 @@ async def sign_in_admin(admin: AdminSignInSchema, db: AsyncSession = Depends(get
     if admin_instance is None:
         raise ValidationError(message='Incorrect email')
 
-
     if verify_password(hashed_password=admin_instance.hashed_password, plain_password=admin.password):
         return TripNestArmeniaJSONResponse(
             message='Admin logins successfully',
