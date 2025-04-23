@@ -61,7 +61,7 @@ async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata)
         await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
 
 
-async def _fetch_file_data(file_name: str) -> Tuple[PlaceMetadata, bytes] | None:
+async def _fetch_file_data(file_name: str) -> Tuple[PlaceMetadata, str, bytes] | None:
     metadata = await find_file_metadata_by_file_name(file_name)
     try:
         stream = await download_file_from_mongo_db(file_name)
@@ -72,19 +72,23 @@ async def _fetch_file_data(file_name: str) -> Tuple[PlaceMetadata, bytes] | None
         data = await stream.read()
     except Exception:
         raise
-    return metadata, data
+    return metadata, file_name, data
 
 
-async def create_files_zip_buffer(file_names: List[str]) -> BytesIO:
+async def create_files_zip_buffer(file_names: List[str], need_only_one_image: bool) -> BytesIO:
     tasks = [_fetch_file_data(name) for name in file_names]
     results = await asyncio.gather(*tasks)
 
     buf = BytesIO()
 
     with zipfile.ZipFile(buf, mode="w") as zf:
-        for metadata, data in results:
-            place_name = metadata.get('place_name') or "unknown"
-            zf.writestr(place_name, data)
+        if need_only_one_image:
+            for metadata, _, image in results:
+                image_name = metadata.get('place_name') or "unknown"
+                zf.writestr(image_name, image)
+        else:
+            for _, file_name, image in results:
+                zf.writestr(file_name, image)
 
     buf.seek(0)
     return buf
@@ -116,3 +120,27 @@ async def find_file_metadata_by_file_name(file_name: str) -> PlaceMetadata | Non
         metadata = file_metadata["metadata"]
         return metadata
     return None
+
+
+async def get_place_images_by_exact_name_pattern(place_name_pattern: str) -> BytesIO:
+    """
+    Получает все изображения, filename которых начинается с place_name_pattern,
+    скачивает и упаковывает их в ZIP, возвращает как BytesIO.
+    """
+    files_collection = mongo_async_client["fs"]["files"]
+    query = {
+        "filename": {
+            "$regex": f"^{place_name_pattern}(-\\d+)?$",  # например: Amenaprkich или Amenaprkich-1
+            "$options": "i"
+        }
+    }
+
+    cursor = files_collection.find(query)
+    filenames = []
+    async for file in cursor:
+        filenames.append(file["filename"])
+
+    if not filenames:
+        raise ValueError(f"No images found for place name: {place_name_pattern}")
+
+    return await create_files_zip_buffer(filenames, need_only_one_image=False)

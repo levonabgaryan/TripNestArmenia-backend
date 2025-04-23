@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from fastapi.responses import JSONResponse
 from fastapi import status
@@ -31,7 +31,7 @@ def to_camel_case(string: str) -> str:
     return inflection.camelize(string, uppercase_first_letter=False)
 
 
-def convert_keys_to_camel_case(data: Dict[str, Any]):
+def convert_keys_to_camel_case(data: Dict[str, Any] | List[Any]) -> Dict[str, Any] | List[Any]:
     if isinstance(data, dict):
         return {to_camel_case(key): convert_keys_to_camel_case(value) for key, value in data.items()}
     elif isinstance(data, list):

@@ -7,12 +7,20 @@ BASE_DIR = Path(__file__).parent / "images"
 
 from src.helpers.databases.mongo_db.mongo_file_manager import upload_local_file_in_db, PlaceMetadata
 
-AMENAPRKICH: PlaceMetadata = {
+AMENAPRKICH_1: PlaceMetadata = {
     'place_name': 'Ամենափրկիչ',
     'description': 'Ամենափրկիչ ․․․',
     'region': 'Շիրակ',
     'location': 'Գյումրի',
     'local_image_path': str(BASE_DIR / "amenaprkich-1.jpg")
+}
+
+AMENAPRKICH_2: PlaceMetadata = {
+    'place_name': 'Ամենափրկիչ',
+    'description': 'Ամենափրկիչ ․․․',
+    'region': 'Շիրակ',
+    'location': 'Գյումրի',
+    'local_image_path': str(BASE_DIR / "amenaprkich-2.jpg")
 }
 
 QAXAQAPETARAN: PlaceMetadata = {
@@ -31,7 +39,7 @@ CHULOCHNI: PlaceMetadata = {
     'local_image_path': str(BASE_DIR / "chulochni-1.jpg")
 }
 
-DATA = (AMENAPRKICH, QAXAQAPETARAN, CHULOCHNI)
+DATA = (AMENAPRKICH_1, AMENAPRKICH_2, QAXAQAPETARAN, CHULOCHNI)
 
 
 async def upload_gyumri_data() -> None:
