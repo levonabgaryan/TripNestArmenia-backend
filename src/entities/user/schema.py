@@ -16,4 +16,4 @@ class UserSignUpSchema(CamelCaseBaseModel):
 
 class UserVerificationSchema(CamelCaseBaseModel):
     email: EmailStr
-    verified_code: str = Field(..., alias="verificationCode")
+    verified_code: str

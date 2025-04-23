@@ -24,7 +24,7 @@ router = APIRouter(prefix='/user', tags=['user'])
 async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_async_session)):
     user_instance = await get_user_by_email(user_data.email, db)
     if user_instance:
-        raise EmailExists()
+        raise EmailExists(email=user_data.email)
     password_hash = get_password_hash(user_data.password)
     new_user = await create_user(
         db,
@@ -35,12 +35,12 @@ async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_as
     )
     if new_user:
         new_user_verification_instance = await create_user_verification_instance_by_email(
-            new_user.email,
+            new_user.email,  # noqa
             db
         )  # in user_verification table
         await send_mail(
             subject='Welcome to TripNestArmenia',
-            email_to=new_user.email,
+            email_to=new_user.email,  # noqa
             body={'verification_code': new_user_verification_instance.verification_code},
         )
 

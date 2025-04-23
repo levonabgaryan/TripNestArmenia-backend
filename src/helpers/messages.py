@@ -3,7 +3,7 @@ SUCCESS = 'Success'
 INVALID_PASSWORD_FORMAT = "Invalid password"
 
 # Email
-EMAIL_EXISTS = "Email already exists"
+EMAIL_EXISTS = "email already exists"
 INVALID_EMAIL_FORMAT = "Invalid email format"
 EMAIL_NOT_EXISTS = "Email does not exists"
 

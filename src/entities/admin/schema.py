@@ -8,7 +8,7 @@ PasswordString = Annotated[str, WrapValidator(validate_password_format)]
 
 class AdminCreateSchema(BaseModel):
     email: EmailStr
-    password: str
+    password: PasswordString
     first_name: str
     last_name: str
 
