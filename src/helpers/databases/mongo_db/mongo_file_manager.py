@@ -4,6 +4,8 @@ from typing import IO, List, Tuple, Optional, TypedDict
 import zipfile
 import asyncio
 import json
+import re
+
 
 import aiofiles
 from fastapi import UploadFile
@@ -61,7 +63,8 @@ async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata)
         await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
 
 
-async def _fetch_file_data(file_name: str) -> Tuple[PlaceMetadata, str, bytes] | None:
+async def _fetch_file_data(file_name: str, only_description_from_metadata: bool = False) -> Tuple[
+                                                                                                PlaceMetadata, str, bytes] | str | None:
     metadata = await find_file_metadata_by_file_name(file_name)
     try:
         stream = await download_file_from_mongo_db(file_name)
@@ -72,6 +75,10 @@ async def _fetch_file_data(file_name: str) -> Tuple[PlaceMetadata, str, bytes] |
         data = await stream.read()
     except Exception:
         raise
+
+    if only_description_from_metadata:
+        return metadata.get('description')
+
     return metadata, file_name, data
 
 
@@ -94,7 +101,6 @@ async def create_files_zip_buffer(file_names: List[str], need_only_one_image: bo
     return buf
 
 
-
 async def find_filenames_by_location(location_pattern: str) -> List[str]:
     files_collection = mongo_async_client["fs"]["files"]
     query = {
@@ -113,6 +119,41 @@ async def find_filenames_by_location(location_pattern: str) -> List[str]:
     return filenames
 
 
+async def find_filenames_by_place_name(place_name_pattern: str) -> List[str]:
+    files_collection = mongo_async_client["fs"]["files"]
+    query = {
+        "metadata.place_name": {
+            "$regex": f"^{place_name_pattern}",
+            "$options": "i"  # регистронезависимый поиск
+        }
+    }
+
+    cursor = files_collection.find(query)
+
+    filenames = []
+    async for file in cursor:
+        filenames.append(file["filename"])
+
+    return filenames
+
+
+async def find_filenames_by_region_name(region_name_pattern: str) -> List[str]:
+    files_collection = mongo_async_client["fs"]["files"]
+    query = {
+        "metadata.region": {
+            "$regex": f"{region_name_pattern}",
+            "$options": "i"
+        }
+    }
+
+    cursor = files_collection.find(query)
+
+    filenames = []
+    async for file in cursor:
+        filenames.append(file["filename"])
+    return filenames
+
+
 async def find_file_metadata_by_file_name(file_name: str) -> PlaceMetadata | None:
     files_collection = mongo_async_client["fs"]["files"]
     file_metadata = await files_collection.find_one({"filename": file_name})
@@ -120,27 +161,3 @@ async def find_file_metadata_by_file_name(file_name: str) -> PlaceMetadata | Non
         metadata = file_metadata["metadata"]
         return metadata
     return None
-
-
-async def get_place_images_by_exact_name_pattern(place_name_pattern: str) -> BytesIO:
-    """
-    Получает все изображения, filename которых начинается с place_name_pattern,
-    скачивает и упаковывает их в ZIP, возвращает как BytesIO.
-    """
-    files_collection = mongo_async_client["fs"]["files"]
-    query = {
-        "filename": {
-            "$regex": f"^{place_name_pattern}(-\\d+)?$",  # например: Amenaprkich или Amenaprkich-1
-            "$options": "i"
-        }
-    }
-
-    cursor = files_collection.find(query)
-    filenames = []
-    async for file in cursor:
-        filenames.append(file["filename"])
-
-    if not filenames:
-        raise ValueError(f"No images found for place name: {place_name_pattern}")
-
-    return await create_files_zip_buffer(filenames, need_only_one_image=False)

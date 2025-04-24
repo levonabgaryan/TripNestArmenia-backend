@@ -10,7 +10,7 @@ from src.helpers.databases.mongo_db.mongo_file_manager import upload_local_file_
 AMENAPRKICH_1: PlaceMetadata = {
     'place_name': 'Ամենափրկիչ',
     'description': 'Ամենափրկիչ ․․․',
-    'region': 'Շիրակ',
+    'region': 'Shirak',
     'location': 'Գյումրի',
     'local_image_path': str(BASE_DIR / "amenaprkich-1.jpg")
 }
@@ -18,7 +18,7 @@ AMENAPRKICH_1: PlaceMetadata = {
 AMENAPRKICH_2: PlaceMetadata = {
     'place_name': 'Ամենափրկիչ',
     'description': 'Ամենափրկիչ ․․․',
-    'region': 'Շիրակ',
+    'region': 'Shirak',
     'location': 'Գյումրի',
     'local_image_path': str(BASE_DIR / "amenaprkich-2.jpg")
 }
@@ -26,7 +26,7 @@ AMENAPRKICH_2: PlaceMetadata = {
 QAXAQAPETARAN: PlaceMetadata = {
     'place_name': 'Քաղաքապետարան',
     'description': 'Քաղաքապետարան ․․․',
-    'region': 'Շիրակ',
+    'region': 'Shirak',
     'location': 'Գյումրի',
     'local_image_path': str(BASE_DIR / "qaxaqapetaran-1.jpg")
 }
@@ -34,7 +34,7 @@ QAXAQAPETARAN: PlaceMetadata = {
 CHULOCHNI: PlaceMetadata = {
     'place_name': 'Չուլոչնի',
     'description': 'Չուլոչնի ․․․',
-    'region': 'Շիրակ',
+    'region': 'Shirak',
     'location': 'Գյումրի',
     'local_image_path': str(BASE_DIR / "chulochni-1.jpg")
 }
@@ -50,6 +50,5 @@ async def upload_gyumri_data() -> None:
         )
         for data in DATA
     ]
+
     await asyncio.gather(*tasks)
-
-
