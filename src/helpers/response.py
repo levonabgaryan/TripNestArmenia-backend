@@ -14,7 +14,7 @@ class TripNestArmeniaJSONResponse(JSONResponse):
     def __init__(
             self,
             status_code=status_code,
-            message: str = messages,
+            message: str = message,
             content: Dict[str, Any] | None = None
     ):
         content = content or {}

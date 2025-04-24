@@ -1,6 +1,7 @@
-INTERNAL_SERVER_ERROR ="Something went wrong"
+INTERNAL_SERVER_ERROR = "Something went wrong"
 SUCCESS = 'Success'
-INVALID_PASSWORD_FORMAT = "Invalid password"
+INCORRECT_PASSWORD_FORMAT = "Incorrect password format"
+INVALID_PASSWORD = "Invalid password"
 
 # Email
 EMAIL_EXISTS = "email already exists"

@@ -9,16 +9,20 @@ from src.entities.user.crud import (
     update_user_active_status,
     delete_user_verify_instance_by_verify_code
 )
-from src.entities.user.schema import UserSignUpSchema, UserVerificationSchema
+from src.entities.user.schema import (
+    UserSignUpSchema,
+    UserVerificationSchema,
+    UserSignInSchema
+)
 from src.helpers.databases.postgres_db import get_async_session
 from src.helpers.exceptions import ValidationError, NotFound, EmailExists
 from src.helpers import messages
 from src.helpers.response import TripNestArmeniaJSONResponse
-from src.routers.auth.utils import get_password_hash
+from src.routers.auth.utils import get_password_hash, verify_password
 from src.helpers.mail import send_mail
 
-
 router = APIRouter(prefix='/user', tags=['user'])
+
 
 @router.post('/sign-up')
 async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_async_session)):
@@ -51,7 +55,7 @@ async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_as
 async def verify_user(user: UserVerificationSchema, db: AsyncSession = Depends(get_async_session)):
     user_instance = await get_user_by_email(user.email, db)
     if not user_instance:
-        raise ValidationError(status_code=status.HTTP_404_NOT_FOUND, message=messages.EMAIL_NOT_EXISTS)
+        raise ValidationError(message=messages.EMAIL_NOT_EXISTS)
     verify_code_in_db = await get_user_verification_code_by_email(user.email, db)
     if verify_code_in_db:
         if user.verified_code == verify_code_in_db:
@@ -66,3 +70,18 @@ async def verify_user(user: UserVerificationSchema, db: AsyncSession = Depends(g
         message=messages.USER_VERIFIED,
         status_code=status.HTTP_201_CREATED
     )  # user in front end side after success must see success message
+
+
+@router.post("/sign-in")
+async def user_sign_in(user: UserSignInSchema, db: AsyncSession = Depends(get_async_session)):
+    print(user, '++asdasdasdas+')
+
+    user_from_db = await get_user_by_email(email=user.email, db=db)
+    if not user_from_db:
+        raise NotFound(message=messages.EMAIL_NOT_EXISTS)
+    if verify_password(plain_password=user.password, hashed_password=user_from_db.hashed_password):
+        return TripNestArmeniaJSONResponse(
+            content={"verified": True}
+        )
+    else:
+        raise ValidationError(message=messages.INVALID_PASSWORD)

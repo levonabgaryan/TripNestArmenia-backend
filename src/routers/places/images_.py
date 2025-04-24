@@ -54,7 +54,7 @@ async def get_place_images_by_place_name(place_name: str):
     )
 
 
-@router.get("/get-region-images/{region-name}")
+@router.get("/get-region-images/{region_name}")
 async def get_region_images_by_region_name(region_name: str):
     region_images = await get_region_images_zip_by_region_name(region_name)
     if region_images is None:

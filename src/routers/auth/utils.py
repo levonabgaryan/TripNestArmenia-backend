@@ -2,7 +2,7 @@ import re
 from passlib.context import CryptContext
 
 from src.helpers.exceptions import ValidationError
-from src.helpers.messages import INVALID_PASSWORD_FORMAT
+from src.helpers.messages import INCORRECT_PASSWORD_FORMAT
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -14,7 +14,7 @@ def is_valid_password(password: str) -> bool:
 
 def validate_password_format(value: str, handler) -> str:
     if not is_valid_password(value):
-        raise ValidationError(message=INVALID_PASSWORD_FORMAT)
+        raise ValidationError(message=INCORRECT_PASSWORD_FORMAT)
 
     return value
 

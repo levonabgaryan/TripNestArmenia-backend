@@ -49,4 +49,4 @@ async def get_region_images_zip_by_region_name(region_name: str) -> BytesIO | No
     file_names = await find_filenames_by_region_name(region_name)
     if not file_names:
         return None
-    return await create_files_zip_buffer(file_names, need_only_one_image=False)
+    return await create_files_zip_buffer(file_names, need_only_one_image=True)
