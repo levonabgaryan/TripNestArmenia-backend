@@ -1,7 +1,7 @@
 import datetime as dt
-from typing import AsyncGenerator, Any
+from typing import AsyncGenerator, Any, Type
 
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, select, RowMapping
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
@@ -57,4 +57,31 @@ async def insert_data[T: BaseDBModel](db: AsyncSession, instance: T) -> T | None
 async def delete_data[T: BaseDBModel](db: AsyncSession, instance: T) -> T | None:
     await db.delete(instance)
     await db.commit()
+    return instance
+
+
+async def update_data[T: BaseDBModel](
+    db: AsyncSession,
+    table_: Type[T],
+    instance_id: int,
+    field_name: str,
+    new_value: Any
+) -> RowMapping | None:
+    result = await db.execute(
+        select(table_).filter(table_.id == instance_id)
+    )
+    instance = result.scalars().first()
+    if not instance:
+        return None
+
+    if not hasattr(instance, field_name):
+        raise AttributeError(f"{table_.__name__} has no attribute '{field_name}'")
+
+    setattr(instance, field_name, new_value)
+
+    if hasattr(instance, "updated_at"):
+        setattr(instance, "updated_at", dt.datetime.utcnow())
+
+    await db.commit()
+    await db.refresh(instance)
     return instance

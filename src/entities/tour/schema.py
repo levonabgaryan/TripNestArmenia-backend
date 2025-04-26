@@ -1,7 +1,16 @@
 from datetime import date
-import enum
+from enum import StrEnum
+from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr, Field
+
+
+class TourStatus(StrEnum):
+    CREATED = "CREATED"
+    IN_PROGRESS = "IN_PROGRESS"
+    ACTIVE = "ACTIVE"
+    REJECTED = "REJECTED"
+    ENDED = "ENDED"
 
 
 class BookTourModel(BaseModel):
@@ -20,9 +29,12 @@ class BookTourModel(BaseModel):
                 data[key] = value.isoformat()
         return data
 
-class TourStatus(enum.Enum):
-    CREATED = "created"
-    IN_PROGRESS = "in_progress"
-    ACTIVE = "active"
-    REJECTED = "rejected"
-    ENDED = "ended"
+
+class ChangeTourStatusModel(BaseModel):
+    tour_id: int = Field(..., alias="tourId")
+    new_status: TourStatus = Field(..., alias="newStatus")
+
+
+class UpdateAmountTourModel(BaseModel):
+    tour_id: int = Field(..., alias="tourId")
+    amount: Decimal

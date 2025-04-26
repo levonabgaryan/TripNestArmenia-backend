@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+from datetime import date
 
 from fastapi.responses import JSONResponse
 from fastapi import status
@@ -15,9 +16,13 @@ class TripNestArmeniaJSONResponse(JSONResponse):
             self,
             status_code=status_code,
             message: str = message,
-            content: Dict[str, Any] | None = None
+            content: dict[str, Any] | None = None
     ):
         content = content or {}
+
+        for key, value in content.items():
+            if isinstance(value, date):
+                content[key] = value.isoformat()
 
         content['status_code'] = status_code
         content['message'] = message
