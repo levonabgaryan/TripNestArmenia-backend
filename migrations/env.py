@@ -9,7 +9,8 @@ from alembic import context
 
 from src.helpers.databases.postgres_db import Base, DATABASE_URL
 from src.entities.user.db_models import *  # noqa
-from src.entities.admin.db_models import * # noqa
+from src.entities.admin.db_models import *  # noqa
+from src.entities.tour.db_models import *  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

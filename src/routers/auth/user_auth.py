@@ -74,14 +74,19 @@ async def verify_user(user: UserVerificationSchema, db: AsyncSession = Depends(g
 
 @router.post("/sign-in")
 async def user_sign_in(user: UserSignInSchema, db: AsyncSession = Depends(get_async_session)):
-    print(user, '++asdasdasdas+')
 
     user_from_db = await get_user_by_email(email=user.email, db=db)
     if not user_from_db:
         raise NotFound(message=messages.EMAIL_NOT_EXISTS)
     if verify_password(plain_password=user.password, hashed_password=user_from_db.hashed_password):
         return TripNestArmeniaJSONResponse(
-            content={"verified": True}
+            content={
+                'verified': True,
+                'first_name': user_from_db.first_name,
+                'last_name': user_from_db.last_name,
+                'email': user_from_db.email,
+                'user_phone_number': user_from_db.user_phone_number
+            }
         )
     else:
         raise ValidationError(message=messages.INVALID_PASSWORD)
