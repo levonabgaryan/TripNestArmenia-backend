@@ -13,6 +13,12 @@ class BookTourModel(BaseModel):
     description: str
     number_of_people: int = Field(..., alias="numberOfPeople")
 
+    def to_dict(self):
+        data = self.__dict__.copy()
+        for key, value in data.items():
+            if isinstance(value, date):
+                data[key] = value.isoformat()
+        return data
 
 class TourStatus(enum.Enum):
     CREATED = "created"
