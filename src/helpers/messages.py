@@ -15,3 +15,6 @@ NOT_FOUND = "Not found"
 # User
 USER_CREATED = "User created"
 USER_VERIFIED = "User verification completed as well"
+
+# Tour
+TOUR_CREATED = "Tour created"

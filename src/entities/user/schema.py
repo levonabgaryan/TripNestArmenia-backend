@@ -9,6 +9,7 @@ PasswordString = Annotated[str, WrapValidator(validate_password_format)]
 class UserSignUpSchema(BaseModel):
     first_name: str = Field(..., alias="firstName")
     last_name: str = Field(..., alias="lastName")
+    user_phone_number: str = Field(..., alias="userPhoneNumber")
     email: EmailStr
     password: PasswordString
 

@@ -13,7 +13,7 @@ class User(BaseDBModel):
     hashed_password: Mapped[str] = mapped_column(default='')
     first_name: Mapped[str] = mapped_column(index=True)
     last_name: Mapped[str] = mapped_column(index=True)
-    user_phone_number: Mapped[str] = mapped_column(nullable=True)
+    user_phone_number: Mapped[str] = mapped_column(default='')
     active: Mapped[bool] = mapped_column(default=False)
     user_verification_code: Mapped["UserVerificationCode"] = \
         relationship(

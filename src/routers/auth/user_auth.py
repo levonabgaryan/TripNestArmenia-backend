@@ -35,7 +35,8 @@ async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_as
         email=user_data.email,
         hashed_password=password_hash,
         first_name=user_data.first_name,
-        last_name=user_data.last_name
+        last_name=user_data.last_name,
+        user_phone_number = user_data.user_phone_number
     )
     if new_user:
         new_user_verification_instance = await create_user_verification_instance_by_email(
@@ -48,7 +49,17 @@ async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_as
             body={'verification_code': new_user_verification_instance.verification_code},
         )
 
-    return TripNestArmeniaJSONResponse(status_code=status.HTTP_201_CREATED, message=messages.USER_CREATED)
+    return TripNestArmeniaJSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        message=messages.USER_CREATED,
+        content={
+            'verified': True,
+            'first_name': new_user.first_name,
+            'last_name': new_user.last_name,
+            'email': new_user.email,
+            'user_phone_number': new_user.user_phone_number
+        }
+    )
 
 
 @router.post('/verify-user')
@@ -59,7 +70,7 @@ async def verify_user(user: UserVerificationSchema, db: AsyncSession = Depends(g
     verify_code_in_db = await get_user_verification_code_by_email(user.email, db)
     if verify_code_in_db:
         if user.verified_code == verify_code_in_db:
-            active_user = await update_user_active_status(email=user.email, db=db)
+            await update_user_active_status(email=user.email, db=db)
         else:
             raise ValidationError(message=messages.INVALID_VERIFICATION_CODE)
     else:
