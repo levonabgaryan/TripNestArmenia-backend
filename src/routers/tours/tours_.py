@@ -51,11 +51,14 @@ async def get_tours_list_by_status(status_: TourStatus, db: AsyncSession = Depen
 
 
 @router.get("/get-current-month-tours/{tour_status}")
-async def get_current_month_tours_by_status(tour_status: TourStatus, db: AsyncSession = Depends(get_async_session)):
-    tours = await get_current_month_tours_from_db_by_status(db=db, need_id=True, tour_status=tour_status)
-    if not tours:
-        return NotFound(message='No tours in this month')
-    return TripNestArmeniaJSONResponse(content={'tours_list': tours})
+async def get_current_month_tours_by_status(
+    tour_status: TourStatus,
+    db: AsyncSession = Depends(get_async_session)
+):
+    tours = await get_current_month_tours_from_db_by_status(
+        db=db, need_id=True, tour_status=tour_status
+    )
+    return TripNestArmeniaJSONResponse(content={"tours_list": tours or []})
 
 
 @router.patch("/update-tour-status")

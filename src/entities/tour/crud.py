@@ -35,12 +35,15 @@ async def get_tours_by_status(db: AsyncSession, status_: TourStatus, need_id: bo
     ]
 
 
-async def get_current_month_tours_from_db_by_status(tour_status: TourStatus, db: AsyncSession, need_id: bool = False) -> \
-list[dict[str, str]] | None:
+async def get_current_month_tours_from_db_by_status(
+    db: AsyncSession,
+    tour_status: TourStatus,
+    need_id:bool = False
+) -> list[dict[str, str]] | None:
     if need_id:
-        not_need_fields = {"createdAt", "updatedAt"}
+        not_need_fields = {"created_at", "updated_at"}
     else:
-        not_need_fields = {"id", "createdAt", "updatedAt"}
+        not_need_fields = {"id", "created_at", "updated_at"}
 
     now = datetime.now()
     tours = await db.execute(
