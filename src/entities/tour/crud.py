@@ -83,3 +83,18 @@ async def update_amount_of_tour_by_id(db: AsyncSession, tour_id: int, amount: De
         new_value=amount
     )
     return result
+
+
+async def get_tours_by_user_email(user_email: str, db: AsyncSession) -> list[dict[str, str]] | None:
+    not_need_fields = {"id" ,"created_at", "updated_at"}
+
+    tours = await db.execute(
+        select(Tour)
+        .filter(Tour.user_email == user_email)
+    )
+    tours = tours.scalars().all()
+    tours = [tour.to_dict() for tour in tours]
+    return [
+        {k: v for k, v in tour.items() if k not in not_need_fields}
+        for tour in tours
+    ]

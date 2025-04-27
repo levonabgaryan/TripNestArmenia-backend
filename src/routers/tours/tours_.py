@@ -16,7 +16,8 @@ from src.entities.tour.crud import (
     get_tours_by_status,
     get_current_month_tours_from_db_by_status,
     update_tour_status_in_db,
-    update_amount_of_tour_by_id
+    update_amount_of_tour_by_id,
+    get_tours_by_user_email
 )
 from src.helpers.exceptions import NotFound
 from src.helpers.response import TripNestArmeniaJSONResponse
@@ -90,3 +91,15 @@ async def update_amount(tour: UpdateAmountTourModel, db: AsyncSession = Depends(
         )
     else:
         return None
+
+
+@router.get("/get-tours-by-user-email{user_email}")
+async def get_tours_list_for_user(user_email: str, db: AsyncSession = Depends(get_async_session)):
+    list_of_tours = await get_tours_by_user_email(
+        db=db,
+        user_email=user_email
+    )
+
+    return TripNestArmeniaJSONResponse(
+        content={'tours_list': list_of_tours}
+    )
