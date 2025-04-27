@@ -43,6 +43,7 @@ async def sign_in_admin(admin: AdminSignInSchema, db: AsyncSession = Depends(get
         return TripNestArmeniaJSONResponse(
             message='Admin logins successfully',
             content={
+                'admin_id': admin_instance.id,
                 'first_name': admin_instance.first_name,
                 'last_name': admin_instance.last_name
             }
