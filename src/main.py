@@ -6,6 +6,7 @@ from src.routers.places import images_
 from src.routers.auth import admin_auth
 from src.routers.tours import tours_
 from src.routers.chats_ import admin_chat
+from src.helpers.middlewares_ import CheckAccessTokenMiddleware
 
 app = FastAPI()
 
@@ -25,6 +26,7 @@ app.add_middleware(
     expose_headers=["*"]  # <-- Вот здесь ты разрешаешь читать все заголовки
 )
 
+app.add_middleware(CheckAccessTokenMiddleware)
 
 @app.get("/health")
 async def health():

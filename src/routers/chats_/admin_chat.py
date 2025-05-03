@@ -47,14 +47,12 @@ async def websocket_endpoint(
             raw = await websocket.receive_text()
             data_dict = json.loads(raw)
 
-            # Сохраняем в БД
             await save_message_in_admins_chat(
                 db=db,
                 admin_id=data_dict["adminId"],
                 message=data_dict["message"],
             )
 
-            # Рассылаем всем клиентам тот же JSON
             await chat_manager.send_message_to_chat(raw)
 
     except WebSocketDisconnect:

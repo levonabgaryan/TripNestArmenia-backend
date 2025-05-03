@@ -14,6 +14,7 @@ class UserSignUpSchema(BaseModel):
     password: PasswordString
 
 
+
 class UserVerificationSchema(BaseModel):
     email: EmailStr
     verified_code: str = Field(..., alias='verificationCode')

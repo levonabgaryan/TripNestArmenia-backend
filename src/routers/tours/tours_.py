@@ -1,6 +1,3 @@
-from datetime import datetime
-from copy import deepcopy
-
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,8 +50,8 @@ async def get_tours_list_by_status(status_: TourStatus, db: AsyncSession = Depen
 
 @router.get("/get-current-month-tours/{tour_status}")
 async def get_current_month_tours_by_status(
-    tour_status: TourStatus,
-    db: AsyncSession = Depends(get_async_session)
+        tour_status: TourStatus,
+        db: AsyncSession = Depends(get_async_session)
 ):
     tours = await get_current_month_tours_from_db_by_status(
         db=db, need_id=True, tour_status=tour_status
@@ -63,7 +60,7 @@ async def get_current_month_tours_by_status(
 
 
 @router.patch("/update-tour-status")
-async def update_tour_status(tour: ChangeTourStatusModel, db : AsyncSession = Depends(get_async_session)):
+async def update_tour_status(tour: ChangeTourStatusModel, db: AsyncSession = Depends(get_async_session)):
     new_status = tour.new_status
     result = await update_tour_status_in_db(
         db=db,

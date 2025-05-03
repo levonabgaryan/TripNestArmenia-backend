@@ -23,22 +23,20 @@ def handle_keyboard_interrupt(process_):
     try:
         process_.wait()
     except KeyboardInterrupt:
-        print("\nСервер был остановлен с помощью Ctrl+C.")
+        print("\nServer stopped on Ctrl+C.")
     finally:
-        print("Завершаем процесс...")
+        print("End of process...")
         os.kill(process_.pid, signal.SIGTERM)
         sys.exit(0)
 
 
 if __name__ == "__main__":
-    print("📦 Проверка MongoDB и создание коллекции...")
+    print("📦 Check MongoDB and creation of collections...")
     try:
         asyncio.run(upload_gyumri_data())
     except Exception as e:
-        print("❌ Ошибка при загрузке данных:")
-        traceback.print_exc()  # выведет полный стек
-        print("Продолжаем запуск сервера...\n")
-
-    # Запускаем сервер в любом случае
+        print("❌ Fail to load data from mongo:")
+        traceback.print_exc()  # full stack
+        print("Continue to run server...\n")
     process = start_server()
     handle_keyboard_interrupt(process)

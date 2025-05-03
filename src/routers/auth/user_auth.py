@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.entities.user.crud import (
@@ -14,14 +15,18 @@ from src.entities.user.schema import (
     UserVerificationSchema,
     UserSignInSchema
 )
+from src.routers.auth.utils import create_access_token, decode_access_token
 from src.helpers.databases.postgres_db import get_async_session
 from src.helpers.exceptions import ValidationError, NotFound, EmailExists
 from src.helpers import messages
 from src.helpers.response import TripNestArmeniaJSONResponse
-from src.routers.auth.utils import get_password_hash, verify_password
+from src.routers.auth.utils import get_password_hash, verify_password, JWTPayload
 from src.helpers.mail import send_mail
 
 router = APIRouter(prefix='/user', tags=['user'])
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/sign-in")
+
 
 
 @router.post('/sign-up')
@@ -30,13 +35,21 @@ async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_as
     if user_instance:
         raise EmailExists(email=user_data.email)
     password_hash = get_password_hash(user_data.password)
+    payload: JWTPayload = {
+        'email': user_data.email,
+        'first_name': user_data.first_name,
+        'last_name': user_data.last_name,
+        'user_phone_number': user_data.user_phone_number,
+    }
+    access_token = create_access_token(payload=payload)
+
     new_user = await create_user(
         db,
         email=user_data.email,
         hashed_password=password_hash,
         first_name=user_data.first_name,
         last_name=user_data.last_name,
-        user_phone_number = user_data.user_phone_number
+        user_phone_number = user_data.user_phone_number,
     )
     if new_user:
         new_user_verification_instance = await create_user_verification_instance_by_email(
@@ -49,7 +62,7 @@ async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_as
             body={'verification_code': new_user_verification_instance.verification_code},
         )
 
-    return TripNestArmeniaJSONResponse(
+    response =  TripNestArmeniaJSONResponse(
         status_code=status.HTTP_201_CREATED,
         message=messages.USER_CREATED,
         content={
@@ -57,9 +70,19 @@ async def sign_up(user_data: UserSignUpSchema, db: AsyncSession = Depends(get_as
             'first_name': new_user.first_name,
             'last_name': new_user.last_name,
             'email': new_user.email,
-            'user_phone_number': new_user.user_phone_number
+            'user_phone_number': new_user.user_phone_number,
+            'access_token': access_token,
         }
     )
+
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",  # 👈 работает на localhost
+        secure=False
+    )
+    return response
 
 
 @router.post('/verify-user')
@@ -89,15 +112,66 @@ async def user_sign_in(user: UserSignInSchema, db: AsyncSession = Depends(get_as
     user_from_db = await get_user_by_email(email=user.email, db=db)
     if not user_from_db:
         raise NotFound(message=messages.EMAIL_NOT_EXISTS)
-    if verify_password(plain_password=user.password, hashed_password=user_from_db.hashed_password):
-        return TripNestArmeniaJSONResponse(
-            content={
-                'verified': True,
-                'first_name': user_from_db.first_name,
-                'last_name': user_from_db.last_name,
-                'email': user_from_db.email,
-                'user_phone_number': user_from_db.user_phone_number
-            }
-        )
-    else:
+
+    if not verify_password(plain_password=user.password, hashed_password=user_from_db.hashed_password):
         raise ValidationError(message=messages.INVALID_PASSWORD)
+
+    payload: JWTPayload = {
+        'first_name': str(user_from_db.first_name),
+        'last_name': str(user_from_db.last_name),
+        'email': str(user_from_db.email),
+        'user_phone_number': str(user_from_db.user_phone_number)
+    }
+    access_token = create_access_token(payload=payload)
+
+    response = TripNestArmeniaJSONResponse(
+        content={
+            'verified': True,
+            'first_name': user_from_db.first_name,
+            'last_name': user_from_db.last_name,
+            'email': user_from_db.email,
+            'user_phone_number': user_from_db.user_phone_number
+        }
+    )
+
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        samesite="lax",  # 👈 работает на localhost
+        secure=False
+    )
+
+    return response
+
+
+
+
+@router.get("/check")
+async def check_auth(request: Request, db: AsyncSession = Depends(get_async_session)):
+    # Извлекаем токен из cookie
+    token = request.cookies.get("access_token")
+
+    if not token:
+        return TripNestArmeniaJSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"detail": "Authorization token is missing", "authenticated": False},
+        )
+
+    # Декодируем токен
+    payload = decode_access_token(token)
+    user = None
+    if payload:
+        email_ = payload.get('email')
+        user = await get_user_by_email(email_, db)
+        if user:
+            return TripNestArmeniaJSONResponse(
+                content={'authenticated': True, 'email': email_}
+            )
+
+    # Если токен недействителен или пользователь не найден
+    return TripNestArmeniaJSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": "Invalid or expired token", "authenticated": False},
+    )
+
