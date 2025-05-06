@@ -6,7 +6,8 @@ from src.entities.tour.schema import (
     BookTourModel,
     TourStatus,
     ChangeTourStatusModel,
-    UpdateAmountTourModel
+    UpdateAmountTourModel,
+    UserCommentModel
 )
 from src.entities.tour.crud import (
     create_tour,
@@ -14,7 +15,9 @@ from src.entities.tour.crud import (
     get_current_month_tours_from_db_by_status,
     update_tour_status_in_db,
     update_amount_of_tour_by_id,
-    get_tours_by_user_email
+    get_tours_by_user_email,
+    add_comment_for_tour,
+    get_first_50_comments_of_all_tours
 )
 from src.helpers.exceptions import NotFound
 from src.helpers.response import TripNestArmeniaJSONResponse
@@ -100,3 +103,23 @@ async def get_tours_list_for_user(user_email: str, db: AsyncSession = Depends(ge
     return TripNestArmeniaJSONResponse(
         content={'tours_list': list_of_tours}
     )
+
+@router.patch('/leave-comment')
+async def leave_a_comment(comment: UserCommentModel, db: AsyncSession = Depends(get_async_session)):
+    comment = await add_comment_for_tour(
+        tour_id=comment.tour_id,
+        comment=comment.comment,
+        db=db
+    )
+
+    if comment:
+        return TripNestArmeniaJSONResponse(
+            content={'added_comment': comment}
+        )
+    else:
+        return NotFound()
+
+
+@router.get('/get-tours-comments')
+async def get_tours_comment(db: AsyncSession = Depends(get_async_session)):
+    return await get_first_50_comments_of_all_tours(db)

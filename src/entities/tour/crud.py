@@ -86,7 +86,7 @@ async def update_amount_of_tour_by_id(db: AsyncSession, tour_id: int, amount: De
 
 
 async def get_tours_by_user_email(user_email: str, db: AsyncSession) -> list[dict[str, str]] | None:
-    not_need_fields = {"id" ,"created_at", "updated_at"}
+    not_need_fields = {"created_at", "updated_at"}
 
     tours = await db.execute(
         select(Tour)
@@ -98,3 +98,27 @@ async def get_tours_by_user_email(user_email: str, db: AsyncSession) -> list[dic
         {k: v for k, v in tour.items() if k not in not_need_fields}
         for tour in tours
     ]
+
+async def add_comment_for_tour(tour_id: int, comment: str, db: AsyncSession) -> None | str:
+    tour = await db.execute(
+        select(Tour)
+        .filter(Tour.id == tour_id)
+    )
+
+    tour = tour.scalar_one_or_none()
+    if tour:
+        tour.comment = comment
+        db.add(tour)
+        await db.commit()
+        return str(tour.comment)
+
+    return None
+
+async def get_first_50_comments_of_all_tours(db: AsyncSession):
+    result = await db.execute(
+        select(Tour.comment, Tour.destination, Tour.user_email)
+        .where(Tour.comment.isnot(None))
+        .order_by(Tour.id)
+        .limit(50)
+    )
+    return result.mappings().all()

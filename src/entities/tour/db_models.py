@@ -32,6 +32,9 @@ class Tour(BaseDBModel):
         default=0
     )
 
+    comment: Mapped[Optional[str]] = mapped_column()
+
+
     def to_dict(self) -> dict:
         d = {}
         for column in self.__table__.columns:

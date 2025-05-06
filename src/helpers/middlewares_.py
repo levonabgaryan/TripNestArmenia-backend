@@ -11,7 +11,6 @@ class CheckAccessTokenMiddleware(BaseHTTPMiddleware):
         path = request.url.path
 
         if path in PROTECTED_PATHS:
-            # Извлекаем токен из cookies
             token = request.cookies.get("access_token")
             if not token:
                 return TripNestArmeniaJSONResponse(
@@ -21,7 +20,6 @@ class CheckAccessTokenMiddleware(BaseHTTPMiddleware):
 
             payload = decode_access_token(token=token)
             if payload:
-                # Дополняем запрос информацией о пользователе
                 request.state.user = payload
                 return await call_next(request)
             else:
