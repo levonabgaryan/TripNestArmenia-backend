@@ -36,9 +36,9 @@ async def get_tours_by_status(db: AsyncSession, status_: TourStatus, need_id: bo
 
 
 async def get_current_month_tours_from_db_by_status(
-    db: AsyncSession,
-    tour_status: TourStatus,
-    need_id:bool = False
+        db: AsyncSession,
+        tour_status: TourStatus,
+        need_id: bool = False
 ) -> list[dict[str, str]] | None:
     if need_id:
         not_need_fields = {"created_at", "updated_at"}
@@ -99,6 +99,7 @@ async def get_tours_by_user_email(user_email: str, db: AsyncSession) -> list[dic
         for tour in tours
     ]
 
+
 async def add_comment_for_tour(tour_id: int, comment: str, db: AsyncSession) -> None | str:
     tour = await db.execute(
         select(Tour)
@@ -114,11 +115,20 @@ async def add_comment_for_tour(tour_id: int, comment: str, db: AsyncSession) -> 
 
     return None
 
-async def get_first_50_comments_of_all_tours(db: AsyncSession):
+
+async def get_first_15_comments_of_all_tours(db: AsyncSession) -> list[dict[str, str]]:
     result = await db.execute(
         select(Tour.comment, Tour.destination, Tour.user_email)
         .where(Tour.comment.isnot(None))
         .order_by(Tour.id)
-        .limit(50)
+        .limit(15)
     )
-    return result.mappings().all()
+    rows = result.mappings().all()
+    return [
+        {
+            "comment": row["comment"],
+            "destination": row["destination"],
+            "user_email": row["user_email"]
+        }
+        for row in rows
+    ]

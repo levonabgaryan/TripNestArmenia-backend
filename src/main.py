@@ -6,6 +6,7 @@ from src.routers.places import images_
 from src.routers.auth import admin_auth
 from src.routers.tours import tours_
 from src.routers.chats_ import admin_chat
+from src.routers.accomplishers_ import accomplishers_
 from src.helpers.middlewares_ import CheckAccessTokenMiddleware
 
 app = FastAPI()
@@ -15,6 +16,7 @@ app.include_router(images_.router)
 app.include_router(admin_auth.router)
 app.include_router(tours_.router)
 app.include_router(admin_chat.router)
+app.include_router(accomplishers_.router)
 
 
 app.add_middleware(
