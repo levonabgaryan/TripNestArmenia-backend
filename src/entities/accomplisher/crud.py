@@ -23,7 +23,8 @@ class AccomplisherData(TypedDict):
 async def create_accomplisher_in_db(image: UploadFile, accomplisher_data: AccomplisherData, db: AsyncSession) -> Accomplisher | None:
     images_dir = Path(__file__).parent / "images"
     images_dir.mkdir(exist_ok=True, parents=True)
-    file_path = images_dir / image.filename
+    idx = str(image.filename).rfind('.')
+    file_path = images_dir / f'{accomplisher_data['email']}{image.filename[idx:]}'
     try:
         contents = await image.read()
         file_path.write_bytes(contents)
