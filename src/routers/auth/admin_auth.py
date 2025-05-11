@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.entities.admin.schema import AdminSignInSchema, AdminCreateSchema
-from src.helpers.databases.postgres_db import get_async_session
+from src.helpers.databases.postgres_db.postgres_db import get_async_session
 from src.entities.admin.crud import get_admin_by_email, create_admin_in_db
 from src.helpers.exceptions import ValidationError, TripNestArmeniaException, EmailExists
 from src.helpers.response import TripNestArmeniaJSONResponse

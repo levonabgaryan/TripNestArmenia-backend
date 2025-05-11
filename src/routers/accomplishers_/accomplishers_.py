@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.entities.accomplisher.crud import get_accomplishers_data_with_images_and_metadata, create_accomplisher_in_db, AccomplisherData
-from src.helpers.databases.postgres_db import get_async_session
+from src.helpers.databases.postgres_db.postgres_db import get_async_session
 from src.helpers.response import TripNestArmeniaJSONResponse
 
 

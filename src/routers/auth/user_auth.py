@@ -18,7 +18,7 @@ from src.entities.user.schema import (
 
 from src.helpers import messages
 from src.routers.auth.utils import create_access_token, decode_access_token
-from src.helpers.databases.postgres_db import get_async_session
+from src.helpers.databases.postgres_db.postgres_db import get_async_session
 from src.helpers.exceptions import ValidationError, NotFound, EmailExists
 from src.helpers.response import TripNestArmeniaJSONResponse
 from src.routers.auth.utils import get_password_hash, verify_password, JWTPayload

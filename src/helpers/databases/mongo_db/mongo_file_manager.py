@@ -3,9 +3,6 @@ from io import BytesIO
 from typing import IO, List, Tuple, Optional, TypedDict
 import zipfile
 import asyncio
-import json
-import re
-
 
 import aiofiles
 from fastapi import UploadFile
@@ -20,6 +17,7 @@ class PlaceMetadata(TypedDict):
     region: str
     local_image_path: Optional[str]
     description: Optional[str]
+    visited_tours_count_by_place_name: int
 
 
 # filename is a correct name of place e.g. Յոթ_վերք_եկեղեցի_1, location=Գյումրի, region=Շիրակ, place_name=Յոթ_վերք

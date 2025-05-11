@@ -5,7 +5,7 @@ from sqlalchemy import select, and_, extract, RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.entities.tour.db_models import Tour
-from src.helpers.databases.postgres_db import insert_data, delete_data, update_data
+from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data, update_data
 from src.entities.tour.schema import TourStatus
 
 

@@ -2,7 +2,7 @@ import re
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-from src.helpers.databases.postgres_db import BaseDBModel
+from src.helpers.databases.postgres_db.postgres_db import BaseDBModel
 
 
 class User(BaseDBModel):

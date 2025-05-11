@@ -8,7 +8,7 @@ from src.entities.admin.crud import (
     get_first_50_messages_of_chat,
     save_message_in_admins_chat,
 )
-from src.helpers.databases.postgres_db import get_async_session
+from src.helpers.databases.postgres_db.postgres_db import get_async_session
 from src.helpers.response import TripNestArmeniaJSONResponse
 
 router = APIRouter(prefix="/chats", tags=["chats"])

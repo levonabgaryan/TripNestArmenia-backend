@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.helpers.databases.postgres_db import get_async_session
+from src.helpers.databases.postgres_db.postgres_db import get_async_session
 from src.entities.tour.schema import (
     BookTourModel,
     TourStatus,

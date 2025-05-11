@@ -5,7 +5,7 @@ from pydantic import EmailStr
 
 from src.entities.user.db_models import User, UserVerificationCode
 from src.entities.user.utils import generate_verification_code
-from src.helpers.databases.postgres_db import insert_data, delete_data
+from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data
 
 
 async def get_user_by_email(email: EmailStr, db: AsyncSession) -> User | None:

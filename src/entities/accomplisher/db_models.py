@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.helpers.databases.postgres_db import BaseDBModel
+from src.helpers.databases.postgres_db.postgres_db import BaseDBModel
 
 
 class Accomplisher(BaseDBModel):

@@ -6,7 +6,7 @@ from sqlalchemy import Numeric
 from sqlalchemy import CheckConstraint, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.helpers.databases.postgres_db import BaseDBModel
+from src.helpers.databases.postgres_db.postgres_db import BaseDBModel
 from src.entities.tour.schema import TourStatus
 
 

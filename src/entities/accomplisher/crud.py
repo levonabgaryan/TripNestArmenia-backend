@@ -10,7 +10,7 @@ from pathlib import Path
 from fastapi import UploadFile, HTTPException
 
 from src.entities.accomplisher.db_models import Accomplisher
-from src.helpers.databases.postgres_db import insert_data, delete_data
+from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data
 
 
 class AccomplisherData(TypedDict):

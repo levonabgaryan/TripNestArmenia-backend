@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import EmailStr
 
 from src.entities.admin.db_models import Admin, AdminChatMessage
-from src.helpers.databases.postgres_db import insert_data, delete_data
+from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data
 
 
 async def create_admin_in_db(db: AsyncSession, **kwargs) -> Admin:

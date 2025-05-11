@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.helpers.databases.postgres_db import BaseDBModel
+from src.helpers.databases.postgres_db.postgres_db import BaseDBModel
 
 
 class Admin(BaseDBModel):
