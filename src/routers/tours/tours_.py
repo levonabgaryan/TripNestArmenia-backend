@@ -78,7 +78,7 @@ async def update_tour_status(tour: ChangeTourStatusModel, db: AsyncSession = Dep
         return None
 
 
-@router.patch("/update-amount/")
+@router.patch("/update-amount")
 async def update_amount(tour: UpdateAmountTourModel, db: AsyncSession = Depends(get_async_session)):
     result = await update_amount_of_tour_by_id(
         db=db,
