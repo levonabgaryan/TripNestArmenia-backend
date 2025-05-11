@@ -4,18 +4,18 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status,
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.entities.accomplisher.crud import get_accomplishers_data_with_images, create_accomplisher_in_db, AccomplisherData
+from src.entities.accomplisher.crud import get_accomplishers_data_with_images_and_metadata, create_accomplisher_in_db, AccomplisherData
 from src.helpers.databases.postgres_db import get_async_session
 from src.helpers.response import TripNestArmeniaJSONResponse
 
 
-router = APIRouter(prefix='/accomplishers_', tags=['accomplishers_'])
+router = APIRouter(prefix='/accomplishers', tags=['accomplishers_'])
 
 
 @router.get("/get-all-data")
 async def download_accomplishers_bundle(db: AsyncSession = Depends(get_async_session)):
 
-    bundle = await get_accomplishers_data_with_images(db)
+    bundle = await get_accomplishers_data_with_images_and_metadata(db)
     return StreamingResponse(
         bundle,
         media_type="application/zip",

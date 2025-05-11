@@ -42,7 +42,7 @@ async def create_accomplisher_in_db(image: UploadFile, accomplisher_data: Accomp
     return result
 
 
-async def get_accomplishers_data_with_images(db: AsyncSession) -> io.BytesIO:
+async def get_accomplishers_data_with_images_and_metadata(db: AsyncSession) -> io.BytesIO:
     stmt = select(
         Accomplisher.email,
         Accomplisher.first_name,
