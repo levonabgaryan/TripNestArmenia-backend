@@ -1,5 +1,6 @@
 from typing import TypedDict
 import json
+import asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -20,7 +21,8 @@ class AccomplisherData(TypedDict):
     info: str
 
 
-async def create_accomplisher_in_db(image: UploadFile, accomplisher_data: AccomplisherData, db: AsyncSession) -> Accomplisher | None:
+async def create_accomplisher_in_db(image: UploadFile, accomplisher_data: AccomplisherData,
+                                    db: AsyncSession) -> Accomplisher | None:
     images_dir = Path(__file__).parent / "images"
     images_dir.mkdir(exist_ok=True, parents=True)
     idx = str(image.filename).rfind('.')
@@ -43,7 +45,9 @@ async def create_accomplisher_in_db(image: UploadFile, accomplisher_data: Accomp
     return result
 
 
-async def get_accomplishers_data_with_images_and_metadata(db: AsyncSession) -> io.BytesIO:
+async def get_accomplishers_data_with_images_and_metadata(
+        db: AsyncSession
+) -> io.BytesIO:
     stmt = select(
         Accomplisher.email,
         Accomplisher.first_name,
@@ -55,6 +59,11 @@ async def get_accomplishers_data_with_images_and_metadata(db: AsyncSession) -> i
     rows = result.mappings().all()
     data = [dict(row) for row in rows]
 
+    buf = await asyncio.to_thread(_build_zip, data)
+    return buf
+
+
+def _build_zip(data: list[dict]) -> io.BytesIO:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
         archive.writestr(
