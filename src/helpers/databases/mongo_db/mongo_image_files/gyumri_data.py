@@ -12,7 +12,8 @@ AMENAPRKICH_1: PlaceMetadata = {
     'description': 'Ամենափրկիչ ․․․',
     'region': 'Shirak',
     'location': 'Գյումրի',
-    'local_image_path': str(BASE_DIR / "amenaprkich-1.jpg")
+    'local_image_path': str(BASE_DIR / "amenaprkich-1.jpg"),
+    'visited_tours_count_by_location': 0
 }
 
 AMENAPRKICH_2: PlaceMetadata = {
@@ -20,7 +21,8 @@ AMENAPRKICH_2: PlaceMetadata = {
     'description': 'Ամենափրկիչ ․․․',
     'region': 'Shirak',
     'location': 'Գյումրի',
-    'local_image_path': str(BASE_DIR / "amenaprkich-2.jpg")
+    'local_image_path': str(BASE_DIR / "amenaprkich-2.jpg"),
+    'visited_tours_count_by_location': 0
 }
 
 QAXAQAPETARAN: PlaceMetadata = {
@@ -28,7 +30,8 @@ QAXAQAPETARAN: PlaceMetadata = {
     'description': 'Քաղաքապետարան ․․․',
     'region': 'Shirak',
     'location': 'Գյումրի',
-    'local_image_path': str(BASE_DIR / "qaxaqapetaran-1.jpg")
+    'local_image_path': str(BASE_DIR / "qaxaqapetaran-1.jpg"),
+    'visited_tours_count_by_location': 0
 }
 
 CHULOCHNI: PlaceMetadata = {
@@ -36,7 +39,8 @@ CHULOCHNI: PlaceMetadata = {
     'description': 'Չուլոչնի ․․․',
     'region': 'Shirak',
     'location': 'Գյումրի',
-    'local_image_path': str(BASE_DIR / "chulochni-1.jpg")
+    'local_image_path': str(BASE_DIR / "chulochni-1.jpg"),
+    'visited_tours_count_by_location': 0
 }
 
 DATA = (AMENAPRKICH_1, AMENAPRKICH_2, QAXAQAPETARAN, CHULOCHNI)

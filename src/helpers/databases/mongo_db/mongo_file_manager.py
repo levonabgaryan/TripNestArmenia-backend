@@ -17,7 +17,7 @@ class PlaceMetadata(TypedDict):
     region: str
     local_image_path: Optional[str]
     description: Optional[str]
-    visited_tours_count_by_place_name: int
+    visited_tours_count_by_location: Optional[int]
 
 
 # filename is a correct name of place e.g. Յոթ_վերք_եկեղեցի_1, location=Գյումրի, region=Շիրակ, place_name=Յոթ_վերք
@@ -61,8 +61,10 @@ async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata)
         await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
 
 
-async def _fetch_file_data(file_name: str, only_description_from_metadata: bool = False) -> Tuple[
-                                                                                                PlaceMetadata, str, bytes] | str | None:
+async def _fetch_file_data(
+        file_name: str,
+        only_description_from_metadata: bool = False
+) -> Tuple[PlaceMetadata, str, bytes] | str | None:
     metadata = await find_file_metadata_by_file_name(file_name)
     try:
         stream = await download_file_from_mongo_db(file_name)
