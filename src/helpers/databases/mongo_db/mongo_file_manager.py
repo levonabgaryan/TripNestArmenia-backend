@@ -9,9 +9,10 @@ from fastapi import UploadFile
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket, AsyncIOMotorGridOut
 
 from src.helpers.databases.mongo_db.mongo_db import mongo_async_client
+from src.helpers.exceptions import FileNameAlreadyExists
 
 
-class PlaceMetadata(TypedDict):
+class PlaceMetadata(TypedDict, total=False):
     place_name: str
     location: str
     region: str
@@ -45,6 +46,8 @@ async def upload_file_in_db(file: UploadFile, file_name: str, metadata: PlaceMet
         contents = await file.read()
         stream: IO[bytes] = BytesIO(contents)
         await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
+    else:
+        raise FileNameAlreadyExists(file_name=file_name)
 
 
 async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata) -> None:
@@ -59,11 +62,13 @@ async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata)
 
         stream: IO[bytes] = BytesIO(data)
         await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
+    else:
+        raise FileNameAlreadyExists(file_name=file_name)
 
 
 async def _fetch_file_data(
-        file_name: str,
-        only_description_from_metadata: bool = False
+    file_name: str,
+    only_description_from_metadata: bool = False
 ) -> Tuple[PlaceMetadata, str, bytes] | str | None:
     metadata = await find_file_metadata_by_file_name(file_name)
     try:

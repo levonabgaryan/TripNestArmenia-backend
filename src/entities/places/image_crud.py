@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from fastapi import UploadFile
 
 from src.helpers.databases.mongo_db.mongo_file_manager import (
     create_files_zip_buffer,
@@ -7,7 +8,8 @@ from src.helpers.databases.mongo_db.mongo_file_manager import (
     find_filenames_by_location,
     find_filenames_by_place_name,
     find_file_metadata_by_file_name,
-    find_filenames_by_region_name
+    find_filenames_by_region_name,
+    upload_file_in_db, PlaceMetadata
 )
 
 
@@ -50,3 +52,7 @@ async def get_region_images_zip_by_region_name(region_name: str) -> BytesIO | No
     if not file_names:
         return None
     return await create_files_zip_buffer(file_names, need_only_one_image=True)
+
+
+async def upload_image_with_metadata_in_db(file: UploadFile, file_name: str, metadata: PlaceMetadata) -> None:
+    await upload_file_in_db(file=file, file_name=file_name, metadata=metadata)

@@ -1,16 +1,19 @@
+from typing import Optional
 from base64 import b64encode
 
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
 
 from src.entities.places.image_crud import (
     get_location_images_zip_by_location,
     get_place_images_zip_by_place_name,
     get_image_description_by_place_name,
-    get_region_images_zip_by_region_name
+    get_region_images_zip_by_region_name,
+    upload_image_with_metadata_in_db
 )
-from src.helpers.exceptions import NotFound
-from src.helpers.response import convert_keys_to_camel_case
+from src.helpers.databases.mongo_db.mongo_file_manager import PlaceMetadata
+from src.helpers.exceptions import NotFound, FileNameAlreadyExists
+from src.helpers.response import convert_keys_to_camel_case, TripNestArmeniaJSONResponse
 
 router = APIRouter(prefix='/images', tags=['images'])
 
@@ -66,3 +69,26 @@ async def get_region_images_by_region_name(region_name: str):
             "Content-Disposition": 'attachment; filename="images.zip"',
         }
     )
+
+
+@router.post("/upload-image-with-metadata")
+async def upload_image_with_metadata(
+    image: UploadFile = File(...),
+    place_name: str = Form(...),
+    location: str = Form(...),
+    region: str = Form(...),
+    file_name: str = Form(...),
+    description: Optional[str] = Form(None)
+):
+    image_metadata: PlaceMetadata = {
+        'place_name': place_name,
+        'location': location,
+        'region': region,
+        'description': description
+    }
+    await upload_image_with_metadata_in_db(
+        file_name=file_name,
+        file=image,
+        metadata=image_metadata
+    )
+    return TripNestArmeniaJSONResponse()

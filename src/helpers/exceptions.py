@@ -36,3 +36,12 @@ class EmailExists(TripNestArmeniaException):
     def __init__(self, email: EmailStr):
         full_message = f"{email} {self.default_message}"
         super().__init__(message=full_message)
+
+
+class FileNameAlreadyExists(TripNestArmeniaException):
+    status_code = status.HTTP_409_CONFLICT
+    default_message = messages.FILE_NAME_EXISTS
+
+    def __init__(self, file_name: str):
+        full_message = f"{file_name} {self.default_message}"
+        super().__init__(message=full_message)

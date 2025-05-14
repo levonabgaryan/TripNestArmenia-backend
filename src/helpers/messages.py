@@ -18,3 +18,7 @@ USER_VERIFIED = "User verification completed as well"
 
 # Tour
 TOUR_CREATED = "Tour created"
+
+
+# File
+FILE_NAME_EXISTS = "file name already exists choose another"
