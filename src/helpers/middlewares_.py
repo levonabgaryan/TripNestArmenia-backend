@@ -10,8 +10,9 @@ class CheckAccessTokenMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
-        if path in PROTECTED_PATHS:
+        if path in PROTECTED_PATHS and request.method != "OPTIONS":
             token = request.cookies.get("access_token")
+            print(token, '=====================')
             if not token:
                 return TripNestArmeniaJSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,

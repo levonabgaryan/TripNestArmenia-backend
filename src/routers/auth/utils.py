@@ -1,5 +1,5 @@
 import re
-from typing import TypedDict, Optional, NotRequired
+from typing import TypedDict, NotRequired
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 
@@ -12,8 +12,8 @@ from jwt.exceptions import InvalidTokenError
 from src.helpers.exceptions import ValidationError
 from src.helpers.messages import INCORRECT_PASSWORD_FORMAT
 
-
-SECRET_KEY = 'MY_SECRET_KEY'  # must be taken from env
+# must be taken from env
+SECRET_KEY = 'MY_SECRET_KEY'
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_DAYS = 30
 
