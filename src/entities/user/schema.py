@@ -23,3 +23,8 @@ class UserVerificationSchema(BaseModel):
 class UserSignInSchema(BaseModel):
     email: EmailStr
     password: PasswordString
+
+
+class UserForgotPasswordSchema(BaseModel):
+    email: EmailStr
+    new_password: str = Field(..., alias='newPassword')

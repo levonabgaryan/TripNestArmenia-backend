@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status, Request
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.entities.user.crud import (
@@ -8,12 +7,14 @@ from src.entities.user.crud import (
     create_user_verification_instance_by_email,
     get_user_verification_code_by_email,
     update_user_active_status,
-    delete_user_verify_instance_by_verify_code
+    delete_user_verify_instance_by_verify_code,
+    update_verification_code_for_user
 )
 from src.entities.user.schema import (
     UserSignUpSchema,
     UserVerificationSchema,
-    UserSignInSchema
+    UserSignInSchema,
+    UserForgotPasswordSchema
 )
 
 from src.helpers import messages
@@ -135,7 +136,7 @@ async def user_sign_in(user: UserSignInSchema, db: AsyncSession = Depends(get_as
         key="access_token",
         value=access_token,
         httponly=True,
-        samesite="lax",  # 👈 работает на localhost
+        samesite="lax",  # for localhost
         secure=False
     )
 
@@ -166,3 +167,23 @@ async def check_auth(request: Request, db: AsyncSession = Depends(get_async_sess
         status_code=status.HTTP_401_UNAUTHORIZED,
         content={"detail": "Invalid or expired token", "authenticated": False},
     )
+
+
+@router.post("/forgot-password")
+async def user_forgot_password(data_: UserForgotPasswordSchema, db = Depends(get_async_session)):
+    user = await get_user_by_email(email=data_.email, db=db)
+    if not user:
+        raise ValidationError(message=messages.EMAIL_NOT_EXISTS)
+
+    new_verification_code = await update_verification_code_for_user(
+        email=user.email,  # noqa
+        db=db,
+    )
+
+    await send_mail(
+        subject='Verification code for new password',
+        email_to=user.email,  # noqa
+        body={'verification_code': new_verification_code},
+    )
+
+    return TripNestArmeniaJSONResponse()

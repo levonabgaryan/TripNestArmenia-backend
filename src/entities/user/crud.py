@@ -5,7 +5,7 @@ from pydantic import EmailStr
 
 from src.entities.user.db_models import User, UserVerificationCode
 from src.entities.user.utils import generate_verification_code
-from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data
+from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data, update_data
 
 
 async def get_user_by_email(email: EmailStr, db: AsyncSession) -> User | None:
@@ -28,11 +28,28 @@ async def create_user_verification_instance_by_email(email: EmailStr, db: AsyncS
     return await insert_data(db, instance)
 
 
+async def update_verification_code_for_user(email: EmailStr, db: AsyncSession) -> None | str:
+
+    verify_instance = await get_user_verification_instance_by_email(email=email, db=db)
+
+    if not verify_instance:
+        return
+
+    new_verification_code = generate_verification_code()
+    await update_data(
+        db=db,
+        table_=UserVerificationCode,
+        instance_id=verify_instance.id,
+        field_name="verification_code",
+        new_value=new_verification_code
+    )
+    return new_verification_code
+
 async def get_user_verification_instance_by_email(email: EmailStr, db: AsyncSession) -> UserVerificationCode | None:
     result = await db.execute(
         select(UserVerificationCode) \
-        .join(User, User.id == UserVerificationCode.user_id) \
-        .filter(User.email == email)
+            .join(User, User.id == UserVerificationCode.user_id) \
+            .filter(User.email == email)
     )
     return result.scalar()
 
