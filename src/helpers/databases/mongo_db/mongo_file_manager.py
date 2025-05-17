@@ -8,7 +8,7 @@ import aiofiles
 from fastapi import UploadFile
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket, AsyncIOMotorGridOut
 
-from src.helpers.databases.mongo_db.mongo_db import mongo_async_client
+from src.helpers.databases.mongo_db.mongo_db import mongo_async_client, client
 from src.helpers.exceptions import FileNameAlreadyExists
 
 
@@ -52,13 +52,15 @@ async def upload_file_in_db(file: UploadFile, file_name: str, metadata: PlaceMet
 
 
 async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata) -> None:
-    file_name = os.path.basename(local_file_path)
-    idx = file_name.find('.')
-    file_name = file_name[:idx]
-    if await is_file_exists_by_file_name(file_name):
-        return None
+    file_name = os.path.basename(local_file_path).split('.')[0]
 
     file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
+
+    cursor = mongo_async_client.fs.files.find({"filename": file_name})
+    async for file_doc in cursor:
+        file_id = file_doc["_id"]
+        await mongo_async_client.fs.files.delete_one({"_id": file_id})
+        await mongo_async_client.fs.chunks.delete_many({"files_id": file_id})
 
     async with aiofiles.open(local_file_path, 'rb') as file:
         data = await file.read()
@@ -98,12 +100,14 @@ async def create_files_zip_buffer(file_names: List[str], need_only_one_image: bo
         if need_only_one_image:
             for metadata, _, image in results:
                 if metadata.get('location_in_map'):
-                    image_name = metadata.get('place_name') or "unknown"
-                    zf.writestr(image_name, image)
+                    file_name = metadata.get('place_name') or "unknown"
+                    zf.writestr(file_name, image)
+                    break
                 else:
                     continue
         else:
-            for _, file_name, image in results:
+            for metadata, _, image in results:
+                file_name = metadata.get('place_name') or "unknown"
                 zf.writestr(file_name, image)
 
     buf.seek(0)
@@ -132,8 +136,8 @@ async def find_filenames_by_place_name(place_name_pattern: str) -> List[str]:
     files_collection = mongo_async_client["fs"]["files"]
     query = {
         "metadata.place_name": {
-            "$regex": f"^{place_name_pattern}",
-            "$options": "i"  # регистронезависимый поиск
+            "$regex": f".*{place_name_pattern}.*",
+            "$options": "i"
         }
     }
 
@@ -143,7 +147,10 @@ async def find_filenames_by_place_name(place_name_pattern: str) -> List[str]:
     async for file in cursor:
         filenames.append(file["filename"])
 
+    print(filenames, 'ssss')
+
     return filenames
+
 
 
 async def find_filenames_by_region_name(region_name_pattern: str) -> List[str]:

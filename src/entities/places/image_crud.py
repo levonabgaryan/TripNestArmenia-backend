@@ -49,8 +49,21 @@ async def get_image_description_by_place_name(place_name: str) -> str | None:
 
     for file_name in file_names:
         metadata = await find_file_metadata_by_file_name(file_name)
-        if metadata:
-            return metadata.get('description')
+        if description := metadata.get('description'):
+            return description
+    return None
+
+
+async def get_image_description_by_location(location: str) -> str | None:
+    location = location.lower()
+    file_names = await find_filenames_by_location(location_pattern=location)
+    if not file_names:
+        return None
+
+    for file_name in file_names:
+        metadata = await find_file_metadata_by_file_name(file_name)
+        if description := metadata.get('description'):
+            return description
     return None
 
 
@@ -59,8 +72,20 @@ async def get_region_images_zip_by_region_name(region_name: str) -> BytesIO | No
     file_names = await find_filenames_by_region_name(region_name)
     if not file_names:
         return None
-    return await create_files_zip_buffer(file_names, need_only_one_image=True)
+    return await create_files_zip_buffer(file_names, need_only_one_image=False)
 
 
 async def upload_image_with_metadata_in_db(file: UploadFile, file_name: str, metadata: PlaceMetadata) -> None:
     await upload_file_in_db(file=file, file_name=file_name, metadata=metadata)
+
+async def get_location_in_map(location: str) -> tuple[float, float] | None:
+    location = location.lower()
+    file_names = await find_filenames_by_location(location_pattern=location)
+
+    for file_name in file_names:
+        metadata = await find_file_metadata_by_file_name(file_name)
+        if metadata:
+            if coordinates := metadata.get('location_in_map'):
+                return coordinates
+
+    return None

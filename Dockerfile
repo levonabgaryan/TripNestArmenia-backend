@@ -28,6 +28,7 @@ COPY pyproject.toml poetry.lock entrypoint.sh ./
 RUN poetry config virtualenvs.create false && poetry check --lock && poetry env use system && poetry install --only main
 
 ADD . /TripNestArmenia-backend/
+ENV PYTHONPATH=/TripNestArmenia-backend
 
 RUN chmod +x ./entrypoint.sh
 

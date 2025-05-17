@@ -6,9 +6,12 @@ BASE_DIR = Path(__file__).parent / "images"
 
 from src.helpers.databases.mongo_db.mongo_file_manager import upload_local_file_in_db, PlaceMetadata
 
+# latitude - 0, longitude-1
 GYUMRI: PlaceMetadata = {
     'place_name': 'Գյումրի',
-    'description': '',
+    'description': """Գյումրին՝ Հայաստանի երկրորդ խոշոր քաղաքը, հիացնում է իր յուրօրինակ ճարտարապետությամբ, հումորով լի միջավայրով և հարուստ մշակութային ժառանգությամբ։ Տուրի ընթացքում դուք կայցելեք պատմական Կումայրի արգելոցը, կտեսնեք Ռուսական եկեղեցին և Սուրբ Ամենափրկիչ տաճարը, ինչպես նաև կծանոթանաք Գյումրու արվեստագետների և արհեստավորների ստեղծագործություններին։
+                      Տեղում կզգաք գյումրեցու անկեղծ հյուրընկալությունն ու յուրահատուկ կենսախնդություն։ Թարմ օդ, համեղ տեղական խոհանոց, և անկրկնելի հումոր՝ սա է Գյումրին։
+                    """,
     'region': 'Shirak',
     'location': 'Գյումրի',
     'local_image_path': str(BASE_DIR / "GYUMRI.webp"),
@@ -27,7 +30,7 @@ GYUMRI_AMENAPRKICH_1: PlaceMetadata = {
 
 GYUMR_SEV_AMROC: PlaceMetadata = {
     'place_name': 'Սև ամրոց',
-    'description': '․․․',
+    'description': '',
     'region': 'Shirak',
     'location': 'Գյումրի',
     'local_image_path': str(BASE_DIR / "sev-amroc.jpg"),
@@ -36,7 +39,7 @@ GYUMR_SEV_AMROC: PlaceMetadata = {
 
 GYUMRI_DZITOXCYAN: PlaceMetadata = {
     'place_name': 'Ձիթողցյան',
-    'description': '․․․',
+    'description': '',
     'region': 'Shirak',
     'location': 'Գյումրի',
     'local_image_path': str(BASE_DIR / "dzitoxcyanc.jpg"),
@@ -55,4 +58,14 @@ async def upload_data() -> None:
         for data in DATA
     ]
 
-    await asyncio.gather(*tasks)
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for i, result in enumerate(results):
+        if isinstance(result, Exception):
+            print(f"❌ Error in task {i}: {result}")
+        else:
+            print(f"✅ Task {i} completed successfully")
+
+
+if __name__ == "__main__":
+    asyncio.run(upload_data())

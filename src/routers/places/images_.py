@@ -10,7 +10,9 @@ from src.entities.places.image_crud import (
     get_image_description_by_place_name,
     get_region_images_zip_by_region_name,
     upload_image_with_metadata_in_db,
-    get_location_image_zip_by_location
+    get_location_image_zip_by_location,
+    get_image_description_by_location,
+    get_location_in_map
 )
 from src.helpers.databases.mongo_db.mongo_file_manager import PlaceMetadata
 from src.helpers.exceptions import NotFound
@@ -21,16 +23,42 @@ router = APIRouter(prefix='/images', tags=['images'])
 
 @router.get('/get-location-images/{location}')
 async def get_images(location: str):
-    location_image = await get_location_images_zip_by_location(location)
-    if location_image is None:
+    location_images = await get_location_images_zip_by_location(location)
+    if location_images is None:
         raise NotFound(message=f"Missing data for '{location}' location")
 
-    return StreamingResponse(
-        content=location_image,
-        media_type="application/zip",
-        headers={
-            "Content-Disposition": 'attachment; filename="images.zip"',
+    image_description = await get_image_description_by_location(location)
+    location_in_map = await get_location_in_map(location)
+    latitude: float | None = None
+    longitude: float | None = None
+
+
+
+    encoded_description = b64encode(image_description.encode('utf-8')).decode('ascii')
+    encoded_place_name = b64encode(location.encode('utf-8')).decode('ascii')
+
+    headers = {
+        "Content-Disposition": 'attachment; filename="images.zip"',
+        "description": encoded_description,
+        "place_name": encoded_place_name
+    }
+    if location_in_map:
+        latitude = location_in_map[0]
+        longitude = location_in_map[1]
+
+    headers.update(
+        {
+            'latitude': str(latitude) if latitude is not None else "",
+            'longitude': str(longitude) if longitude is not None else ""
         }
+    )
+
+    headers = convert_keys_to_camel_case(headers)
+
+    return StreamingResponse(
+        content=location_images,
+        media_type="application/zip",
+        headers=headers
     )
 
 
