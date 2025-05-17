@@ -19,6 +19,7 @@ class PlaceMetadata(TypedDict, total=False):
     local_image_path: Optional[str]
     description: Optional[str]
     visited_tours_count_by_location: Optional[int]
+    location_in_map: Optional[tuple[float, float]]
 
 
 # filename is a correct name of place e.g. Յոթ_վերք_եկեղեցի_1, location=Գյումրի, region=Շիրակ, place_name=Յոթ_վերք
@@ -54,21 +55,21 @@ async def upload_local_file_in_db(local_file_path: str, metadata: PlaceMetadata)
     file_name = os.path.basename(local_file_path)
     idx = file_name.find('.')
     file_name = file_name[:idx]
-    if not await is_file_exists_by_file_name(file_name):
-        file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
+    if await is_file_exists_by_file_name(file_name):
+        return None
 
-        async with aiofiles.open(local_file_path, 'rb') as file:
-            data = await file.read()
+    file_manager = AsyncIOMotorGridFSBucket(mongo_async_client)
 
-        stream: IO[bytes] = BytesIO(data)
-        await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
-    else:
-        raise FileNameAlreadyExists(file_name=file_name)
+    async with aiofiles.open(local_file_path, 'rb') as file:
+        data = await file.read()
+
+    stream: IO[bytes] = BytesIO(data)
+    await file_manager.upload_from_stream(file_name, stream, metadata=metadata)
 
 
 async def _fetch_file_data(
-    file_name: str,
-    only_description_from_metadata: bool = False
+        file_name: str,
+        only_description_from_metadata: bool = False
 ) -> Tuple[PlaceMetadata, str, bytes] | str | None:
     metadata = await find_file_metadata_by_file_name(file_name)
     try:
@@ -96,8 +97,11 @@ async def create_files_zip_buffer(file_names: List[str], need_only_one_image: bo
     with zipfile.ZipFile(buf, mode="w") as zf:
         if need_only_one_image:
             for metadata, _, image in results:
-                image_name = metadata.get('place_name') or "unknown"
-                zf.writestr(image_name, image)
+                if metadata.get('location_in_map'):
+                    image_name = metadata.get('place_name') or "unknown"
+                    zf.writestr(image_name, image)
+                else:
+                    continue
         else:
             for _, file_name, image in results:
                 zf.writestr(file_name, image)

@@ -18,6 +18,14 @@ async def get_location_images_zip_by_location(location: str) -> BytesIO | None:
     file_names = await find_filenames_by_location(location_pattern=location)
     if not file_names:
         return None
+    return await create_files_zip_buffer(file_names, need_only_one_image=False)
+
+
+async def get_location_image_zip_by_location(location: str) -> BytesIO | None:
+    location = location.lower()
+    file_names = await find_filenames_by_location(location_pattern=location)
+    if not file_names:
+        return None
     return await create_files_zip_buffer(file_names, need_only_one_image=True)
 
 

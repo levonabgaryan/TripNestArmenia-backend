@@ -9,10 +9,11 @@ from src.entities.places.image_crud import (
     get_place_images_zip_by_place_name,
     get_image_description_by_place_name,
     get_region_images_zip_by_region_name,
-    upload_image_with_metadata_in_db
+    upload_image_with_metadata_in_db,
+    get_location_image_zip_by_location
 )
 from src.helpers.databases.mongo_db.mongo_file_manager import PlaceMetadata
-from src.helpers.exceptions import NotFound, FileNameAlreadyExists
+from src.helpers.exceptions import NotFound
 from src.helpers.response import convert_keys_to_camel_case, TripNestArmeniaJSONResponse
 
 router = APIRouter(prefix='/images', tags=['images'])
@@ -20,12 +21,27 @@ router = APIRouter(prefix='/images', tags=['images'])
 
 @router.get('/get-location-images/{location}')
 async def get_images(location: str):
-    location_images = await get_location_images_zip_by_location(location)
-    if location_images is None:
+    location_image = await get_location_images_zip_by_location(location)
+    if location_image is None:
         raise NotFound(message=f"Missing data for '{location}' location")
 
     return StreamingResponse(
-        content=location_images,
+        content=location_image,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": 'attachment; filename="images.zip"',
+        }
+    )
+
+
+@router.get('/get-location-image/{location}')
+async def get_image(location: str):
+    location_image = await get_location_image_zip_by_location(location)
+    if location_image is None:
+        raise NotFound(message=f"Missing data for '{location}' location")
+
+    return StreamingResponse(
+        content=location_image,
         media_type="application/zip",
         headers={
             "Content-Disposition": 'attachment; filename="images.zip"',
@@ -73,12 +89,12 @@ async def get_region_images_by_region_name(region_name: str):
 
 @router.post("/upload-image-with-metadata")
 async def upload_image_with_metadata(
-    image: UploadFile = File(...),
-    place_name: str = Form(...),
-    location: str = Form(...),
-    region: str = Form(...),
-    file_name: str = Form(...),
-    description: Optional[str] = Form(None)
+        image: UploadFile = File(...),
+        place_name: str = Form(...),
+        location: str = Form(...),
+        region: str = Form(...),
+        file_name: str = Form(...),
+        description: Optional[str] = Form(None)
 ):
     image_metadata: PlaceMetadata = {
         'place_name': place_name,

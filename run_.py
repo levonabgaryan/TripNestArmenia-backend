@@ -5,7 +5,7 @@ import sys
 import asyncio
 import traceback
 
-from src.helpers.databases.mongo_db.mongo_image_files.gyumri_data import upload_gyumri_data
+from src.helpers.databases.mongo_db.mongo_image_files.images_data import upload_data
 
 
 def start_server():
@@ -33,7 +33,7 @@ def handle_keyboard_interrupt(process_):
 if __name__ == "__main__":
     print("📦 Check MongoDB and creation of collections...")
     try:
-        asyncio.run(upload_gyumri_data())
+        asyncio.run(upload_data())
     except Exception as e:
         print("❌ Fail to load data from mongo:")
         traceback.print_exc()  # full stack
