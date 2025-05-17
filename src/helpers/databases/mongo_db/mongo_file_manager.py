@@ -132,6 +132,24 @@ async def find_filenames_by_location(location_pattern: str) -> List[str]:
     return filenames
 
 
+async def find_filenames_by_location_or_place_name(pattern_: str) -> list[str]:
+    files_collection = mongo_async_client["fs"]["files"]
+    query = {
+        "$or": [
+            {"metadata.location": {"$regex": pattern_, "$options": "i"}},
+            {"metadata.place_name": {"$regex": pattern_, "$options": "i"}}
+        ]
+    }
+
+    cursor = files_collection.find(query)
+
+    filenames = []
+    async for file in cursor:
+        filenames.append(file["filename"])
+
+    return filenames
+
+
 async def find_filenames_by_place_name(place_name_pattern: str) -> List[str]:
     files_collection = mongo_async_client["fs"]["files"]
     query = {
@@ -150,7 +168,6 @@ async def find_filenames_by_place_name(place_name_pattern: str) -> List[str]:
     print(filenames, 'ssss')
 
     return filenames
-
 
 
 async def find_filenames_by_region_name(region_name_pattern: str) -> List[str]:

@@ -12,7 +12,8 @@ from src.entities.places.image_crud import (
     upload_image_with_metadata_in_db,
     get_location_image_zip_by_location,
     get_image_description_by_location,
-    get_location_in_map
+    get_location_in_map,
+    get_images_by_location_or_place_name
 )
 from src.helpers.databases.mongo_db.mongo_file_manager import PlaceMetadata
 from src.helpers.exceptions import NotFound
@@ -140,3 +141,18 @@ async def upload_image_with_metadata(
         metadata=image_metadata
     )
     return TripNestArmeniaJSONResponse()
+
+
+@router.get("/get-images-by-location-or-place-name/{name}")
+async def get_images_by_place_name_or_location(name: str):
+    images = await get_images_by_location_or_place_name(pattern_=name)
+    if images is None:
+        raise NotFound(message=f"Missing data for '{name}' region")
+
+    return StreamingResponse(
+        content=images,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": 'attachment; filename="images.zip"',
+        }
+    )
