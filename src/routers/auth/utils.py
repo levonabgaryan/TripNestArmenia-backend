@@ -44,8 +44,9 @@ def get_password_hash(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return PWD_CONTEXT.verify(plain_password, hashed_password)
-
+    a = PWD_CONTEXT.verify(plain_password, hashed_password)
+    print(a, '+++++++++++++++++++')
+    return a
 
 def create_access_token(payload: JWTPayload, expires_time: int = ACCESS_TOKEN_EXPIRE_DAYS) -> str:
     to_encode = deepcopy(payload)

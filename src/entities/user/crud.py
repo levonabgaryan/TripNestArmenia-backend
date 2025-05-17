@@ -6,6 +6,7 @@ from pydantic import EmailStr
 from src.entities.user.db_models import User, UserVerificationCode
 from src.entities.user.utils import generate_verification_code
 from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data, update_data
+from src.routers.auth.utils import get_password_hash
 
 
 async def get_user_by_email(email: EmailStr, db: AsyncSession) -> User | None:
@@ -29,7 +30,6 @@ async def create_user_verification_instance_by_email(email: EmailStr, db: AsyncS
 
 
 async def update_verification_code_for_user(email: EmailStr, db: AsyncSession) -> None | str:
-
     verify_instance = await get_user_verification_instance_by_email(email=email, db=db)
 
     if not verify_instance:
@@ -44,6 +44,14 @@ async def update_verification_code_for_user(email: EmailStr, db: AsyncSession) -
         new_value=new_verification_code
     )
     return new_verification_code
+
+
+async def update_user_password(email: EmailStr, new_password: str, db) -> None:
+    user_from_db = await get_user_by_email(email=email, db=db)
+    user_id = int(user_from_db.id)
+    hashed_password_ = get_password_hash(new_password)
+    await update_data(db=db, table_=User, field_name='hashed_password', new_value=hashed_password_, instance_id=user_id)
+
 
 async def get_user_verification_instance_by_email(email: EmailStr, db: AsyncSession) -> UserVerificationCode | None:
     result = await db.execute(

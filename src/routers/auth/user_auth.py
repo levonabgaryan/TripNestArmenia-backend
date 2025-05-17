@@ -8,7 +8,7 @@ from src.entities.user.crud import (
     get_user_verification_code_by_email,
     update_user_active_status,
     delete_user_verify_instance_by_verify_code,
-    update_verification_code_for_user
+    update_verification_code_for_user, update_user_password
 )
 from src.entities.user.schema import (
     UserSignUpSchema,
@@ -179,6 +179,8 @@ async def user_forgot_password(data_: UserForgotPasswordSchema, db = Depends(get
         email=user.email,  # noqa
         db=db,
     )
+
+    await update_user_password(new_password=data_.new_password, db=db, email=data_.email)
 
     await send_mail(
         subject='Verification code for new password',
