@@ -31,10 +31,11 @@ async def get_images(location: str):
     location_in_map = await get_location_in_map(location)
     latitude: float | None = None
     longitude: float | None = None
+    encoded_description: str | None = None
 
+    if image_description:
+        encoded_description = b64encode(image_description.encode('utf-8')).decode('ascii')
 
-
-    encoded_description = b64encode(image_description.encode('utf-8')).decode('ascii')
     encoded_place_name = b64encode(location.encode('utf-8')).decode('ascii')
 
     headers = {
@@ -84,12 +85,15 @@ async def get_place_images_by_place_name(place_name: str):
         raise NotFound(message=f"Missing data for '{place_name}' place")
     image_description = await get_image_description_by_place_name(place_name)
 
-    encoded_description = b64encode(image_description.encode('utf-8')).decode('ascii')
+    encoded_description: bytes | None = None
+    if image_description:
+        encoded_description = b64encode(image_description.encode('utf-8')).decode('ascii')
+
     encoded_place_name = b64encode(place_name.encode('utf-8')).decode('ascii')
 
     headers = {
         "Content-Disposition": 'attachment; filename="images.zip"',
-        "description": encoded_description,
+        "description": encoded_description or '',
         "place_name": encoded_place_name
     }
     headers = convert_keys_to_camel_case(headers)
