@@ -2,7 +2,7 @@ from io import BytesIO
 
 from fastapi import UploadFile
 
-from src.helpers.databases.mongo_db.mongo_file_manager import (
+from src.helpers.databases.mongo_db.mongo_fs_file_manager import (
     create_files_zip_buffer,
     download_file_from_mongo_db,
     find_filenames_by_location,

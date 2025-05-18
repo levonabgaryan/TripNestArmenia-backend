@@ -15,7 +15,7 @@ from src.entities.places.image_crud import (
     get_location_in_map,
     get_images_by_location_or_place_name
 )
-from src.helpers.databases.mongo_db.mongo_file_manager import PlaceMetadata
+from src.helpers.databases.mongo_db.mongo_fs_file_manager import PlaceMetadata
 from src.helpers.exceptions import NotFound
 from src.helpers.response import convert_keys_to_camel_case, TripNestArmeniaJSONResponse
 

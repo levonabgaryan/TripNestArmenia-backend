@@ -119,7 +119,7 @@ async def find_filenames_by_location(location_pattern: str) -> List[str]:
     query = {
         "metadata.location": {
             "$regex": f"^{location_pattern}",
-            "$options": "i"  # регистронезависимый поиск
+            "$options": "i"
         }
     }
 

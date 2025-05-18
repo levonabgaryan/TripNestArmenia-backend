@@ -12,3 +12,4 @@ class Accomplisher(BaseDBModel):
     last_name: Mapped[str] = mapped_column(index=True)
     phone_number: Mapped[str] = mapped_column(nullable=True)
     info: Mapped[str] = mapped_column(nullable=True)
+    image_file_name_in_mongo: Mapped[str] = mapped_column(unique=True, nullable=True)

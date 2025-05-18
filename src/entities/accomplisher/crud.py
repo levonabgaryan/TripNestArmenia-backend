@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, Optional
 import json
 import asyncio
 
@@ -13,41 +13,36 @@ from src.entities.accomplisher.db_models import Accomplisher
 from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data
 
 
-class AccomplisherData(TypedDict):
+class AccomplisherData(TypedDict, total=False):
     email: str
     first_name: str
     last_name: str
     phone_number: str
     info: str
+    image_file_name_in_mongo: Optional[str]
 
 
-async def create_accomplisher_in_db(image: UploadFile, accomplisher_data: AccomplisherData,
-                                    db: AsyncSession) -> Accomplisher | None:
-    images_dir = Path(__file__).parent / "images"
-    images_dir.mkdir(exist_ok=True, parents=True)
-    idx = str(image.filename).rfind('.')
-    file_path = images_dir / f'{accomplisher_data['email']}{image.filename[idx:]}'
-    try:
-        contents = await image.read()
-        file_path.write_bytes(contents)
-    except Exception:
-        raise HTTPException(status_code=500, detail="Failed to save image")
+async def create_accomplisher_in_db(
+    accomplisher_data: AccomplisherData,
+    db: AsyncSession
+) -> Accomplisher | None:
 
     instance = Accomplisher(
         email=accomplisher_data['email'],
         first_name=accomplisher_data['first_name'],
         last_name=accomplisher_data['last_name'],
         phone_number=accomplisher_data['phone_number'],
-        info=accomplisher_data['info']
+        info=accomplisher_data['info'],
+        image_file_name_in_mongo=None
     )
 
     result = await insert_data(db, instance)
     return result
 
 
-async def get_accomplishers_data_with_images_and_metadata(
-        db: AsyncSession
-) -> io.BytesIO:
+async def get_accomplishers_data(
+    db: AsyncSession
+) -> list:
     stmt = select(
         Accomplisher.email,
         Accomplisher.first_name,
@@ -59,22 +54,4 @@ async def get_accomplishers_data_with_images_and_metadata(
     rows = result.mappings().all()
     data = [dict(row) for row in rows]
 
-    buf = await asyncio.to_thread(_build_zip, data)
-    return buf
-
-
-def _build_zip(data: list[dict]) -> io.BytesIO:
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr(
-            "metadata.json",
-            json.dumps(data, ensure_ascii=False, indent=2)
-        )
-
-        images_dir = Path(__file__).parent / "images"
-        for img_path in images_dir.iterdir():
-            if img_path.is_file():
-                archive.write(img_path, arcname=f"images/{img_path.name}")
-
-    buf.seek(0)
-    return buf
+    return data

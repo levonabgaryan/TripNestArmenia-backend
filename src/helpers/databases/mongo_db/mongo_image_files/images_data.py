@@ -4,7 +4,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).parent / "images"
 
-from src.helpers.databases.mongo_db.mongo_file_manager import upload_local_file_in_db, PlaceMetadata
+from src.helpers.databases.mongo_db.mongo_fs_file_manager import upload_local_file_in_db, PlaceMetadata
 
 # latitude - 0, longitude-1
 GYUMRI: PlaceMetadata = {
