@@ -14,6 +14,7 @@ class Tour(BaseDBModel):
     __tablename__ = "tours"
     __table_args__ = (
         CheckConstraint('number_of_people > 0', name='count_positive'),
+        CheckConstraint('assessment IS NULL OR (assessment BETWEEN 1 AND 5)', name='valid_assessment'),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -25,9 +26,10 @@ class Tour(BaseDBModel):
     booking_date: Mapped[date] = mapped_column()
     description: Mapped[str] = mapped_column()
     status: Mapped[TourStatus] = mapped_column(Enum(TourStatus), default=TourStatus.CREATED)
+    assessment: Mapped[Optional[int]] = mapped_column(nullable=True)
 
     amount_by_dram: Mapped[Decimal] = mapped_column(
-        Numeric(precision=12, scale=2),  # 12 цифр максимум, из них 2 после запятой
+        Numeric(precision=12, scale=2),
         nullable=False,
         default=0
     )

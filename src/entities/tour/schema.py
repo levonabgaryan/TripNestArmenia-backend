@@ -39,6 +39,13 @@ class UpdateAmountTourModel(BaseModel):
     tour_id: int = Field(..., alias="tourId")
     amount: Decimal
 
+
 class UserCommentModel(BaseModel):
     tour_id: int
     comment: str
+
+
+class UpdateTourAssessment(BaseModel):
+    tour_id: int = Field(..., alias='tourId')
+    new_assessment: int = Field(..., alias='newAssessment')
+

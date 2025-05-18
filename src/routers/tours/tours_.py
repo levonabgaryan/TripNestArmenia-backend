@@ -7,7 +7,8 @@ from src.entities.tour.schema import (
     TourStatus,
     ChangeTourStatusModel,
     UpdateAmountTourModel,
-    UserCommentModel
+    UserCommentModel,
+    UpdateTourAssessment
 )
 from src.entities.tour.crud import (
     create_tour,
@@ -17,9 +18,11 @@ from src.entities.tour.crud import (
     update_amount_of_tour_by_id,
     get_tours_by_user_email,
     add_comment_for_tour,
-    get_first_15_comments_of_all_tours
+    get_first_15_comments_of_all_tours,
+    update_tour_assessment_in_db,
+    get_tour_assessment_from_db
 )
-from src.helpers.exceptions import NotFound
+from src.helpers.exceptions import NotFound, AssessmentError
 from src.helpers.response import TripNestArmeniaJSONResponse
 from src.helpers import messages
 
@@ -125,3 +128,28 @@ async def leave_a_comment(comment: UserCommentModel, db: AsyncSession = Depends(
 async def get_tours_comment(db: AsyncSession = Depends(get_async_session)):
     comments = await get_first_15_comments_of_all_tours(db)
     return TripNestArmeniaJSONResponse(content={'comments': comments})
+
+
+@router.patch('/update-tour-assessment')
+async def update_tour_assessment(data: UpdateTourAssessment, db: AsyncSession=Depends(get_async_session)):
+    try:
+        await update_tour_assessment_in_db(
+            db=db,
+            tour_id=data.tour_id,
+            new_assessment=data.new_assessment
+        )
+    except AssessmentError as e:
+        return TripNestArmeniaJSONResponse(status_code=status.HTTP_400_BAD_REQUEST, message=str(e))
+    else:
+        return TripNestArmeniaJSONResponse(content={'assessment': data.new_assessment})
+
+
+@router.get('/get-tour-assessment')
+async def get_tour_assessment(tour_id: int, db: AsyncSession = Depends(get_async_session)):
+    tour_assessment = await get_tour_assessment_from_db(
+        tour_id=tour_id,
+        db=db
+    )
+    if not tour_assessment:
+        raise NotFound()
+    return TripNestArmeniaJSONResponse(content={'tour_assessment': tour_assessment})

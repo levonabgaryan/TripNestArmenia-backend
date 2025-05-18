@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.entities.tour.db_models import Tour
 from src.helpers.databases.postgres_db.postgres_db import insert_data, delete_data, update_data
 from src.entities.tour.schema import TourStatus
+from src.helpers.exceptions import AssessmentError
 
 
 async def create_tour(db: AsyncSession, **kwargs) -> Tour | None:
@@ -118,7 +119,7 @@ async def add_comment_for_tour(tour_id: int, comment: str, db: AsyncSession) -> 
 
 async def get_first_15_comments_of_all_tours(db: AsyncSession) -> list[dict[str, str]]:
     result = await db.execute(
-        select(Tour.comment, Tour.destination, Tour.user_email)
+        select(Tour.id, Tour.comment, Tour.destination, Tour.user_email, Tour.assessment)
         .where(Tour.comment.isnot(None))
         .order_by(Tour.id)
         .limit(15)
@@ -126,9 +127,35 @@ async def get_first_15_comments_of_all_tours(db: AsyncSession) -> list[dict[str,
     rows = result.mappings().all()
     return [
         {
+            "tour_id": row["id"],
             "comment": row["comment"],
             "destination": row["destination"],
-            "user_email": row["user_email"]
+            "user_email": row["user_email"],
+            "assessment": row["assessment"]
         }
         for row in rows
     ]
+
+
+async def update_tour_assessment_in_db(tour_id: int, new_assessment: int, db: AsyncSession) -> RowMapping | None:
+    if new_assessment not in {1, 2, 3, 4, 5}:
+        raise AssessmentError(invalid_assessment=new_assessment)
+
+    result = await update_data(
+        db=db,
+        table_=Tour,
+        instance_id=tour_id,
+        field_name='assessment',
+        new_value=new_assessment
+    )
+    return result
+
+
+async def get_tour_assessment_from_db(tour_id: int, db: AsyncSession) -> int | None:
+    result = await db.execute(
+        select(Tour.assessment).where(Tour.id == tour_id)
+    )
+    tour_assessment = result.scalar_one_or_none()
+    return tour_assessment
+
+

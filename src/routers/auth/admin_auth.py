@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.entities.admin.schema import AdminSignInSchema, AdminCreateSchema
 from src.helpers.databases.postgres_db.postgres_db import get_async_session
 from src.entities.admin.crud import get_admin_by_email, create_admin_in_db
-from src.helpers.exceptions import ValidationError, TripNestArmeniaException, EmailExists
+from src.helpers.exceptions import ValidationError, TripNestArmeniaHTTPException, EmailExists
 from src.helpers.response import TripNestArmeniaJSONResponse
 from src.routers.auth.utils import verify_password, get_password_hash
 
