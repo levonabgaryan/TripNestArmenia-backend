@@ -149,10 +149,32 @@ async def get_images_by_place_name_or_location(name: str):
     if images is None:
         raise NotFound(message=f"Missing data for '{name}' region")
 
+    location_in_map = await get_location_in_map(name)
+    image_description = await get_image_description_by_place_name(name) or await get_image_description_by_location(name)
+    encoded_description: str | None = None
+    if image_description:
+        encoded_description = b64encode(image_description.encode('utf-8')).decode('ascii')
+
+    encoded_place_name = b64encode(name.encode('utf-8')).decode('ascii')
+
+    headers = {
+        "Content-Disposition": 'attachment; filename="images.zip"',
+        "description": encoded_description or "...",
+        "place_name": encoded_place_name
+    }
+    if location_in_map:
+        latitude = location_in_map[0]
+        longitude = location_in_map[1]
+        headers.update(
+            {
+                'latitude': str(latitude) if latitude is not None else "",
+                'longitude': str(longitude) if longitude is not None else ""
+            }
+        )
+
+    headers = convert_keys_to_camel_case(headers)
     return StreamingResponse(
         content=images,
         media_type="application/zip",
-        headers={
-            "Content-Disposition": 'attachment; filename="images.zip"',
-        }
+        headers=headers
     )
