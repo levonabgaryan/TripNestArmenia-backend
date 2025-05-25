@@ -96,6 +96,7 @@ async def get_location_in_map(location: str) -> tuple[float, float] | None:
 async def get_images_by_location_or_place_name(pattern_: str) -> BytesIO | None:
     pattern_ = pattern_.lower()
     file_names = await find_filenames_by_location_or_place_name(pattern_)
+    print(file_names, '===============================')
     if not file_names:
         return None
     return await create_files_zip_buffer(file_names, need_only_one_image=False)

@@ -46,7 +46,55 @@ GYUMRI_DZITOXCYAN: PlaceMetadata = {
     'visited_tours_count_by_location': 0,
 }
 
-DATA = (GYUMRI, GYUMRI_AMENAPRKICH_1, GYUMR_SEV_AMROC, GYUMRI_DZITOXCYAN)
+VANADZOR: PlaceMetadata = {
+    'place_name': 'Վանաձոր',
+    'description': 'Վանաձորը՝ Լոռու մարզի վարչական կենտրոնը և Հայաստանի երրորդ խոշոր քաղաքը, հայտնի է իր հյուրընկալությամբ, մեղմ կլիմայով և հանգստյան գոտիներով։ Գտնվելով շրջապատված կանաչապատ լեռներով՝ քաղաքը հիանալի վայր է բնության սիրահարների համար։ Այստեղ կարելի է վայելել հանգիստ մթնոլորտ, այցելել սովետական շրջանի ճարտարապետական ժառանգությունը, ինչպես նաև բացահայտել ժամանակակից մշակութային կենտրոններն ու զբոսայգիները։',
+    'region': 'Lori',
+    'location': 'Վանաձոր',
+    'local_image_path': str(BASE_DIR / "VANADZOR.png"),
+    'location_in_map': (40.807400, 44.497028)
+}
+
+VANADZOR_KAMAKATAR: PlaceMetadata = {
+    'place_name': 'Կամակատար',
+    'description': '',
+    'region': 'Lori',
+    'location': 'Վանաձոր',
+    'local_image_path': str(BASE_DIR / "kamakatar.png"),
+}
+
+VANADZOR_SURB_GRIGOR_NAREKACI: PlaceMetadata = {
+    'place_name': 'Սուրբ Գրիգոր Նարեկացի',
+    'description': '',
+    'region': 'Lori',
+    'location': 'Վանաձոր',
+    'local_image_path': str(BASE_DIR / "surb-grigor-narekaci.png"),
+}
+
+GARNU_TACHAR: PlaceMetadata = {
+    'place_name': 'Գառնու տաճար',
+    'description': 'Գառնու հեթանոսական տաճար, հին հայկական արևապաշտական տաճար Կոտայքի մարզի Գառնի գյուղում, Ազատ գետի աջ ափին։ Հայաստանի պատմության և մշակույթի անշարժ հուշարձան է: Ելնելով ավանդություններից՝ Մովսես Խորենացին Գառնու հիմնադրումը վերագրում է Հայկ նահապետի ծոռ Գեղամին, որի թոռան՝ Գառնիկի անունով էլ, իբրև, կոչվել է Գառնի',
+    'region': 'Kotayq',
+    'location': 'Գառնու տաճար',
+    'local_image_path': str(BASE_DIR / "GARNI.png"),
+    'location_in_map': (40.11833286, 44.720497)
+}
+
+SYUNIQ_TATEVI_VANQ : PlaceMetadata = {
+    'place_name': 'Տաթևի վանք',
+    'description': 'Տաթևի վանք, միջնադարյան վանական համալիր Հայաստանում։ Գտնվում է Սյունիքի մարզի Տաթև գյուղի հարավում՝ Որոտան գետի վտակի ձորի աջափնյա եզերքին։ Ավանդության համաձայն՝ վանքը կոչվել է Թադեոս առաքյալի աշակերտ Եվստաթեոսի անունով:',
+    'region': 'Syunik',
+    'location': 'Տաթևի վանք',
+    'local_image_path': str(BASE_DIR / "tatevi_vanq.jpg"),
+    'location_in_map': (39.38166670, 46.24000000)
+}
+
+DATA = (
+    GYUMRI, GYUMRI_AMENAPRKICH_1, GYUMR_SEV_AMROC, GYUMRI_DZITOXCYAN,
+    VANADZOR, VANADZOR_KAMAKATAR, VANADZOR_SURB_GRIGOR_NAREKACI,
+    GARNU_TACHAR,
+    SYUNIQ_TATEVI_VANQ
+)
 
 
 async def upload_data() -> None:

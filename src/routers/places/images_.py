@@ -172,6 +172,8 @@ async def get_images_by_place_name_or_location(name: str):
             }
         )
 
+    print(location_in_map, '+++++++++++++')
+
     headers = convert_keys_to_camel_case(headers)
     return StreamingResponse(
         content=images,
