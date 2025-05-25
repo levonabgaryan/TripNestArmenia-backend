@@ -12,7 +12,7 @@ from src.settings import DBConfiguration as Db
 DATABASE_URL = f"postgresql+asyncpg://{Db.USER}:{Db.PASSWORD}@{Db.HOST}:{Db.PORT}/{Db.NAME}"
 # for alembic.ini postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 
-async_engine = create_async_engine(DATABASE_URL, echo=True)
+async_engine = create_async_engine(DATABASE_URL, echo=True, isolation_level="REPEATABLE READ")
 Base = declarative_base()
 
 
